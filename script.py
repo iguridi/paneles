@@ -5,8 +5,7 @@ import pandas as pd
 
 from collections import defaultdict
 
-
-def cargar_pedido_agrupado(input_csv="paneles.csv"):
+def cargar_pedido_agrupado(input_csv='paneles.csv'):
     """
     Lee el CSV original y devuelve:
       - cantidades_por_base: dict {BASE: cantidad_total}
@@ -14,7 +13,7 @@ def cargar_pedido_agrupado(input_csv="paneles.csv"):
     Normaliza el código eliminando todo lo que siga al primer '-'.
     """
     cantidades_por_base = defaultdict(int)
-    with open(input_csv, mode="r") as f:
+    with open(input_csv, mode='r') as f:
         reader = csv.reader(f)
         next(reader, None)  # saltar encabezado
         for row in reader:
@@ -29,14 +28,10 @@ def cargar_pedido_agrupado(input_csv="paneles.csv"):
             cantidades_por_base[base] += cant
 
     df_pedido = pd.DataFrame(
-        [
-            {"Panel (base)": k, "Cantidad": v}
-            for k, v in sorted(cantidades_por_base.items())
-        ]
+        [{'Panel (base)': k, 'Cantidad': v} for k, v in sorted(cantidades_por_base.items())]
     )
     return dict(cantidades_por_base), df_pedido
-
-
+    
 def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
     """
     Reusa la lógica que hoy tienes adentro del for del CSV,
@@ -59,122 +54,50 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
             return
 
         if 100 <= ANCHO <= 300:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BASTIDOR_MURO_54",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": cantidad * ALTO,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_MURO",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": cantidad * ALTO,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "BASTIDOR_MURO_54",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": cantidad * ALTO})
+            despiece.append({"panel": panel, "perfil": "ALA_MURO",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": cantidad * ALTO})
         elif 301 <= ANCHO <= 399:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_MURO",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * cantidad * ALTO,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_MURO",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * cantidad * ALTO})
         elif 400 <= ANCHO <= 579:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_MURO",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * cantidad * ALTO,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOCHICO",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": 175,
-                    "total_mm": 175 * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOCHICO",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": 258,
-                    "total_mm": 258 * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_MURO",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * cantidad * ALTO})
+            despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                             "numero_piezas": cantidad, "largo_pieza_mm": 175,
+                             "total_mm": 175 * cantidad})
+            despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                             "numero_piezas": cantidad, "largo_pieza_mm": 258,
+                             "total_mm": 258 * cantidad})
         elif 580 <= ANCHO <= 600:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_MURO",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * cantidad * ALTO,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOGRANDE",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": 160,
-                    "total_mm": 160 * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOGRANDE",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": 258,
-                    "total_mm": 258 * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_MURO",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * cantidad * ALTO})
+            despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                             "numero_piezas": cantidad, "largo_pieza_mm": 160,
+                             "total_mm": 160 * cantidad})
+            despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                             "numero_piezas": cantidad, "largo_pieza_mm": 258,
+                             "total_mm": 258 * cantidad})
         else:
             print("Pieza WF no corresponde al catálogo:", panel)
             return
 
         # Elementos base para WF
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "REFUERZOCHICO",
-                "numero_piezas": cantidad,
-                "largo_pieza_mm": ANCHO,
-                "total_mm": cantidad * ANCHO,
-            }
-        )
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "REFUERZOGRANDE",
-                "numero_piezas": 6 * cantidad,
-                "largo_pieza_mm": ANCHO,
-                "total_mm": 6 * cantidad * ANCHO,
-            }
-        )
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "BASTIDOR_MURO_50",
-                "numero_piezas": 2 * cantidad,
-                "largo_pieza_mm": ANCHO,
-                "total_mm": 2 * cantidad * ANCHO,
-            }
-        )
+        despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                         "numero_piezas": cantidad, "largo_pieza_mm": ANCHO,
+                         "total_mm": cantidad * ANCHO})
+        despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                         "numero_piezas": 6 * cantidad, "largo_pieza_mm": ANCHO,
+                         "total_mm": 6 * cantidad * ANCHO})
+        despiece.append({"panel": panel, "perfil": "BASTIDOR_MURO_50",
+                         "numero_piezas": 2 * cantidad, "largo_pieza_mm": ANCHO,
+                         "total_mm": 2 * cantidad * ANCHO})
 
     # --- Panel SF ---
     elif tipo == "SF":
@@ -187,25 +110,13 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
         if 100 <= ANCHO <= 399:
             pass
         elif 400 <= ANCHO <= 579:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOCHICO",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": 258,
-                    "total_mm": 258 * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                             "numero_piezas": cantidad, "largo_pieza_mm": 258,
+                             "total_mm": 258 * cantidad})
         elif 580 <= ANCHO <= 600:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOGRANDE",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": 258,
-                    "total_mm": 258 * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                             "numero_piezas": cantidad, "largo_pieza_mm": 258,
+                             "total_mm": 258 * cantidad})
         else:
             print("ANCHO no corresponde en panel SF:", panel)
             return
@@ -227,67 +138,31 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
                     a += 140
                 l *= -1
             if rg != 0:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZOGRANDE",
-                        "numero_piezas": rg * cantidad,
-                        "largo_pieza_mm": ANCHO,
-                        "total_mm": rg * ANCHO * cantidad,
-                    }
-                )  # FIX
+                despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                                 "numero_piezas": rg * cantidad, "largo_pieza_mm": ANCHO,
+                                 "total_mm": rg * ANCHO * cantidad})  # FIX
             if rch != 0:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZOCHICO",
-                        "numero_piezas": rch * cantidad,
-                        "largo_pieza_mm": ANCHO,
-                        "total_mm": rch * ANCHO * cantidad,
-                    }
-                )
+                despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                                 "numero_piezas": rch * cantidad, "largo_pieza_mm": ANCHO,
+                                 "total_mm": rch * ANCHO * cantidad})
         else:
             print("ALTO no permitido en panel SF:", panel)
             return
 
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "BASTIDOR_MURO_50",
-                "numero_piezas": 2 * cantidad,
-                "largo_pieza_mm": ANCHO,
-                "total_mm": 2 * cantidad * ANCHO,
-            }
-        )
+        despiece.append({"panel": panel, "perfil": "BASTIDOR_MURO_50",
+                         "numero_piezas": 2 * cantidad, "largo_pieza_mm": ANCHO,
+                         "total_mm": 2 * cantidad * ANCHO})
         if 100 <= ANCHO <= 300:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_MURO",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": ALTO * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BASTIDOR_MURO_54",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": ALTO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_MURO",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": ALTO * cantidad})
+            despiece.append({"panel": panel, "perfil": "BASTIDOR_MURO_54",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": ALTO * cantidad})
         else:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_MURO",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * cantidad * ALTO,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_MURO",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * cantidad * ALTO})
 
     # --- Panel MF ---
     elif tipo == "MF":
@@ -316,25 +191,13 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
             if c != 0:
                 b = ALTO - 275 - 300 * (c - 1)
             if rg != 0:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZOGRANDE",
-                        "numero_piezas": rg * cantidad,
-                        "largo_pieza_mm": ANCHO,
-                        "total_mm": rg * ANCHO * cantidad,
-                    }
-                )  # FIX
+                despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                                 "numero_piezas": rg * cantidad, "largo_pieza_mm": ANCHO,
+                                 "total_mm": rg * ANCHO * cantidad})  # FIX
             if rch != 0:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZOCHICO",
-                        "numero_piezas": rch * cantidad,
-                        "largo_pieza_mm": ANCHO,
-                        "total_mm": rch * ANCHO * cantidad,
-                    }
-                )
+                despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                                 "numero_piezas": rch * cantidad, "largo_pieza_mm": ANCHO,
+                                 "total_mm": rch * ANCHO * cantidad})
         else:
             print("ALTO no permitido en panel MF:", panel)
             return
@@ -342,64 +205,28 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
         if 100 <= ANCHO <= 399:
             pass
         elif 400 <= ANCHO <= 579:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOCHICO",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": b,
-                    "total_mm": b * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                             "numero_piezas": cantidad, "largo_pieza_mm": b,
+                             "total_mm": b * cantidad})
         else:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOGRANDE",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": b,
-                    "total_mm": b * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                             "numero_piezas": cantidad, "largo_pieza_mm": b,
+                             "total_mm": b * cantidad})
 
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "BASTIDOR_MURO_50",
-                "numero_piezas": 2 * cantidad,
-                "largo_pieza_mm": ANCHO,
-                "total_mm": 2 * cantidad * ANCHO,
-            }
-        )
+        despiece.append({"panel": panel, "perfil": "BASTIDOR_MURO_50",
+                         "numero_piezas": 2 * cantidad, "largo_pieza_mm": ANCHO,
+                         "total_mm": 2 * cantidad * ANCHO})
         if 100 <= ANCHO <= 300:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_MURO",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": ALTO * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BASTIDOR_MURO_54",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": ALTO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_MURO",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": ALTO * cantidad})
+            despiece.append({"panel": panel, "perfil": "BASTIDOR_MURO_54",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": ALTO * cantidad})
         else:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_MURO",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * cantidad * ALTO,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_MURO",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * cantidad * ALTO})
 
     # --- Panel CL / CLI / CLE ---
     elif tipo in ("CL", "CLI", "CLE"):
@@ -425,168 +252,68 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
 
         if ALTO == 50:
             if not ie:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN50",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": LARGO,
-                        "total_mm": LARGO * cantidad,
-                    }
-                )
+                despiece.append({"panel": panel, "perfil": "CLN50",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                                 "total_mm": LARGO * cantidad})
             else:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN50",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": A,
-                        "total_mm": A * cantidad,
-                    }
-                )
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN50",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": B,
-                        "total_mm": B * cantidad,
-                    }
-                )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZO_CL50",
-                    "numero_piezas": cantidad
-                    * (2 + (LARGO // 600 - 1) + (A // 600) + (B // 600)),
-                    "largo_pieza_mm": 0,
-                    "total_mm": 0,
-                }
-            )
+                despiece.append({"panel": panel, "perfil": "CLN50",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": A,
+                                 "total_mm": A * cantidad})
+                despiece.append({"panel": panel, "perfil": "CLN50",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": B,
+                                 "total_mm": B * cantidad})
+            despiece.append({"panel": panel, "perfil": "REFUERZO_CL50",
+                             "numero_piezas": cantidad * (2 + (LARGO // 600 - 1) + (A // 600) + (B // 600)),
+                             "largo_pieza_mm": 0, "total_mm": 0})
 
         elif ALTO == 70:
             if not ie:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN70",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": LARGO,
-                        "total_mm": LARGO * cantidad,
-                    }
-                )
+                despiece.append({"panel": panel, "perfil": "CLN70",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                                 "total_mm": LARGO * cantidad})
             else:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN70",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": A,
-                        "total_mm": A * cantidad,
-                    }
-                )
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN70",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": B,
-                        "total_mm": B * cantidad,
-                    }
-                )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZO_CL70",
-                    "numero_piezas": cantidad
-                    * (2 + (LARGO // 600 - 1) + (A // 600) + (B // 600)),
-                    "largo_pieza_mm": 0,
-                    "total_mm": 0,
-                }
-            )
+                despiece.append({"panel": panel, "perfil": "CLN70",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": A,
+                                 "total_mm": A * cantidad})
+                despiece.append({"panel": panel, "perfil": "CLN70",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": B,
+                                 "total_mm": B * cantidad})
+            despiece.append({"panel": panel, "perfil": "REFUERZO_CL70",
+                             "numero_piezas": cantidad * (2 + (LARGO // 600 - 1) + (A // 600) + (B // 600)),
+                             "largo_pieza_mm": 0, "total_mm": 0})
 
         elif ALTO == 100:
             if not ie:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN100",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": LARGO,
-                        "total_mm": LARGO * cantidad,
-                    }
-                )
+                despiece.append({"panel": panel, "perfil": "CLN100",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                                 "total_mm": LARGO * cantidad})
             else:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN100",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": A,
-                        "total_mm": A * cantidad,
-                    }
-                )
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "CLN100",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": B,
-                        "total_mm": B * cantidad,
-                    }
-                )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZO_CL100",
-                    "numero_piezas": cantidad
-                    * (2 + (LARGO // 600 - 1) + (A // 600) + (B // 600)),
-                    "largo_pieza_mm": 0,
-                    "total_mm": 0,
-                }
-            )
+                despiece.append({"panel": panel, "perfil": "CLN100",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": A,
+                                 "total_mm": A * cantidad})
+                despiece.append({"panel": panel, "perfil": "CLN100",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": B,
+                                 "total_mm": B * cantidad})
+            despiece.append({"panel": panel, "perfil": "REFUERZO_CL100",
+                             "numero_piezas": cantidad * (2 + (LARGO // 600 - 1) + (A // 600) + (B // 600)),
+                             "largo_pieza_mm": 0, "total_mm": 0})
         else:
             # Caso especial 70x150
             if ANCHO == 70 and ALTO == 150:
                 if not ie:
-                    despiece.append(
-                        {
-                            "panel": panel,
-                            "perfil": "CLN70",
-                            "numero_piezas": cantidad,
-                            "largo_pieza_mm": LARGO,
-                            "total_mm": LARGO * cantidad,
-                        }
-                    )
+                    despiece.append({"panel": panel, "perfil": "CLN70",
+                                     "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                                     "total_mm": LARGO * cantidad})
                 else:
-                    despiece.append(
-                        {
-                            "panel": panel,
-                            "perfil": "CLN70",
-                            "numero_piezas": cantidad,
-                            "largo_pieza_mm": A,
-                            "total_mm": A * cantidad,
-                        }
-                    )
-                    despiece.append(
-                        {
-                            "panel": panel,
-                            "perfil": "CLN70",
-                            "numero_piezas": cantidad,
-                            "largo_pieza_mm": B,
-                            "total_mm": B * cantidad,
-                        }
-                    )
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZO_CL70",
-                        "numero_piezas": cantidad
-                        * (2 + (LARGO // 600 - 1) + (A // 600) + (B // 600)),
-                        "largo_pieza_mm": 0,
-                        "total_mm": 0,
-                    }
-                )
+                    despiece.append({"panel": panel, "perfil": "CLN70",
+                                     "numero_piezas": cantidad, "largo_pieza_mm": A,
+                                     "total_mm": A * cantidad})
+                    despiece.append({"panel": panel, "perfil": "CLN70",
+                                     "numero_piezas": cantidad, "largo_pieza_mm": B,
+                                     "total_mm": B * cantidad})
+                despiece.append({"panel": panel, "perfil": "REFUERZO_CL70",
+                                 "numero_piezas": cantidad * (2 + (LARGO // 600 - 1) + (A // 600) + (B // 600)),
+                                 "largo_pieza_mm": 0, "total_mm": 0})
             else:
                 print("ALTO no reconocido para panel CL:", panel)
                 return
@@ -600,24 +327,12 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
             return
 
         if 100 <= LARGO <= 2400:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZO_IC",
-                    "numero_piezas": 2 * cantidad + (LARGO // 300 - 1) * cantidad,
-                    "largo_pieza_mm": 0,
-                    "total_mm": 0,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ICN",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": LARGO,
-                    "total_mm": LARGO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZO_IC",
+                             "numero_piezas": 2 * cantidad + (LARGO // 300 - 1) * cantidad,
+                             "largo_pieza_mm": 0, "total_mm": 0})
+            despiece.append({"panel": panel, "perfil": "ICN",
+                             "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                             "total_mm": LARGO * cantidad})
         else:
             print("LARGO no permitido en panel IC:", panel)
             return
@@ -629,15 +344,9 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
         except Exception:
             print("Error extrayendo LARGO en panel OC:", panel_raw)
             return
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "OCN",
-                "numero_piezas": cantidad,
-                "largo_pieza_mm": LARGO,
-                "total_mm": LARGO * cantidad,
-            }
-        )
+        despiece.append({"panel": panel, "perfil": "OCN",
+                         "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                         "total_mm": LARGO * cantidad})
 
     # --- Panel BH ---
     elif tipo == "BH":
@@ -647,25 +356,13 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
             print("Error extrayendo dimensiones en panel BH:", panel_raw)
             return
         if ANCHO in [100, 110, 120]:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BH120",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": LARGO,
-                    "total_mm": LARGO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "BH120",
+                             "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                             "total_mm": LARGO * cantidad})
         else:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BH150",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": LARGO,
-                    "total_mm": LARGO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "BH150",
+                             "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                             "total_mm": LARGO * cantidad})
 
     # --- Panel BCP ---
     elif tipo == "BCP":
@@ -676,43 +373,19 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
             return
         if 100 <= ALTO <= 300 and 100 <= ANCHO <= 1800:
             if 600 <= ANCHO <= 1349:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZOCHICO",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": ALTO,
-                        "total_mm": ALTO * cantidad,
-                    }
-                )
+                despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                                 "total_mm": ALTO * cantidad})
             elif 1350 <= ANCHO <= 1800:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZOCHICO",
-                        "numero_piezas": 2 * cantidad,
-                        "largo_pieza_mm": ALTO,
-                        "total_mm": 2 * ALTO * cantidad,
-                    }
-                )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BCPN",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ANCHO,
-                    "total_mm": ANCHO * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BASTIDOR_LOSA_50",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * ALTO * cantidad,
-                }
-            )
+                despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                                 "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                                 "total_mm": 2 * ALTO * cantidad})
+            despiece.append({"panel": panel, "perfil": "BCPN",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ANCHO,
+                             "total_mm": ANCHO * cantidad})
+            despiece.append({"panel": panel, "perfil": "BASTIDOR_LOSA_50",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * ALTO * cantidad})
         else:
             print("⚠️⚠️Pieza BCP no corresponde a ninguna del catálogo⚠️⚠️:", panel)
             return
@@ -726,43 +399,19 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
             return
         if 100 <= ALTO <= 300 and 100 <= ANCHO <= 1800:
             if 600 <= ANCHO <= 1349:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZOCHICO",
-                        "numero_piezas": cantidad,
-                        "largo_pieza_mm": ALTO,
-                        "total_mm": ALTO * cantidad,
-                    }
-                )
+                despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                                 "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                                 "total_mm": ALTO * cantidad})
             elif 1350 <= ANCHO <= 1800:
-                despiece.append(
-                    {
-                        "panel": panel,
-                        "perfil": "REFUERZOCHICO",
-                        "numero_piezas": 2 * cantidad,
-                        "largo_pieza_mm": ALTO,
-                        "total_mm": 2 * ALTO * cantidad,
-                    }
-                )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BCPN",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ANCHO,
-                    "total_mm": ANCHO * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BASTIDOR_LOSA_50",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * ALTO * cantidad,
-                }
-            )
+                despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                                 "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                                 "total_mm": 2 * ALTO * cantidad})
+            despiece.append({"panel": panel, "perfil": "BCPN",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ANCHO,
+                             "total_mm": ANCHO * cantidad})
+            despiece.append({"panel": panel, "perfil": "BASTIDOR_LOSA_50",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * ALTO * cantidad})
         else:
             print("⚠️⚠️Pieza CP no corresponde a ninguna del catálogo⚠️⚠️:", panel)
             return
@@ -778,121 +427,55 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
             LARGO = ALTO
             C = 1
         elif 500 <= ALTO <= 899:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOGRANDE",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ANCHO,
-                    "total_mm": ANCHO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ANCHO,
+                             "total_mm": ANCHO * cantidad})
             LARGO = ALTO // 2
             C = 2
         elif 900 <= ALTO <= 1199:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOGRANDE",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ANCHO,
-                    "total_mm": 2 * ANCHO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ANCHO,
+                             "total_mm": 2 * ANCHO * cantidad})
             LARGO = (300 + (ALTO - 300) / 2) // 2  # tu regla de negocio
             C = 2
         elif ALTO == 1200:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOGRANDE",
-                    "numero_piezas": 3 * cantidad,
-                    "largo_pieza_mm": ANCHO,
-                    "total_mm": 3 * ANCHO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                             "numero_piezas": 3 * cantidad, "largo_pieza_mm": ANCHO,
+                             "total_mm": 3 * ANCHO * cantidad})
             LARGO = 300
             C = 2
         else:
             print("Error en panel CE:", panel)
             return
 
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "BASTIDOR_LOSA_50",
-                "numero_piezas": 2 * cantidad,
-                "largo_pieza_mm": ANCHO,
-                "total_mm": 2 * ANCHO * cantidad,
-            }
-        )
+        despiece.append({"panel": panel, "perfil": "BASTIDOR_LOSA_50",
+                         "numero_piezas": 2 * cantidad, "largo_pieza_mm": ANCHO,
+                         "total_mm": 2 * ANCHO * cantidad})
         if 100 <= ANCHO < 300:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_LOSA",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": ALTO * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "BASTIDOR_LOSA_54",
-                    "numero_piezas": cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": ALTO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_LOSA",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": ALTO * cantidad})
+            despiece.append({"panel": panel, "perfil": "BASTIDOR_LOSA_54",
+                             "numero_piezas": cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": ALTO * cantidad})
         elif 300 <= ANCHO <= 399:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_LOSA",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * ALTO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_LOSA",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * ALTO * cantidad})
         elif 400 <= ANCHO <= 499:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_LOSA",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * ALTO * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOCHICO",
-                    "numero_piezas": C * cantidad,
-                    "largo_pieza_mm": LARGO,
-                    "total_mm": C * LARGO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "ALA_LOSA",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * ALTO * cantidad})
+            despiece.append({"panel": panel, "perfil": "REFUERZOCHICO",
+                             "numero_piezas": C * cantidad, "largo_pieza_mm": LARGO,
+                             "total_mm": C * LARGO * cantidad})
         else:
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "REFUERZOGRANDE",
-                    "numero_piezas": C * cantidad,
-                    "largo_pieza_mm": LARGO,
-                    "total_mm": C * LARGO * cantidad,
-                }
-            )
-            despiece.append(
-                {
-                    "panel": panel,
-                    "perfil": "ALA_LOSA",
-                    "numero_piezas": 2 * cantidad,
-                    "largo_pieza_mm": ALTO,
-                    "total_mm": 2 * ALTO * cantidad,
-                }
-            )
+            despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                             "numero_piezas": C * cantidad, "largo_pieza_mm": LARGO,
+                             "total_mm": C * LARGO * cantidad})
+            despiece.append({"panel": panel, "perfil": "ALA_LOSA",
+                             "numero_piezas": 2 * cantidad, "largo_pieza_mm": ALTO,
+                             "total_mm": 2 * ALTO * cantidad})
 
     # --- Panel CS ---
     elif tipo == "CS":
@@ -901,15 +484,9 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
         except Exception:
             print("Error extrayendo dimensiones en panel CS:", panel_raw)
             return
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "BCPN",
-                "numero_piezas": cantidad,
-                "largo_pieza_mm": LARGO,
-                "total_mm": LARGO * cantidad,
-            }
-        )
+        despiece.append({"panel": panel, "perfil": "BCPN",
+                         "numero_piezas": cantidad, "largo_pieza_mm": LARGO,
+                         "total_mm": LARGO * cantidad})
         a = 100
         c = 0
         while a <= LARGO:
@@ -921,38 +498,19 @@ def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
             else:
                 a += 300
                 c += 1
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "REFUERZOGRANDE",
-                "numero_piezas": c * cantidad,
-                "largo_pieza_mm": ANCHO,
-                "total_mm": ANCHO * c * cantidad,
-            }
-        )
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "TUBO",
-                "numero_piezas": c * cantidad,
-                "largo_pieza_mm": 47,
-                "total_mm": 47 * c * cantidad,
-            }
-        )
-        despiece.append(
-            {
-                "panel": panel,
-                "perfil": "BASTIDOR_LOSA_50",
-                "numero_piezas": 2 * cantidad,
-                "largo_pieza_mm": ANCHO,
-                "total_mm": 2 * ANCHO * cantidad,
-            }
-        )
+        despiece.append({"panel": panel, "perfil": "REFUERZOGRANDE",
+                         "numero_piezas": c * cantidad, "largo_pieza_mm": ANCHO,
+                         "total_mm": ANCHO * c * cantidad})
+        despiece.append({"panel": panel, "perfil": "TUBO",
+                         "numero_piezas": c * cantidad, "largo_pieza_mm": 47,
+                         "total_mm": 47 * c * cantidad})
+        despiece.append({"panel": panel, "perfil": "BASTIDOR_LOSA_50",
+                         "numero_piezas": 2 * cantidad, "largo_pieza_mm": ANCHO,
+                         "total_mm": 2 * ANCHO * cantidad})
 
     else:
         print("Tipo de panel no reconocido:", panel_raw)
         return
-
 
 def calcular_despiece_desde_agrupado(cantidades_por_base):
     despiece = []
@@ -961,7 +519,6 @@ def calcular_despiece_desde_agrupado(cantidades_por_base):
             continue
         _agregar_despiece_de_panel(base, cantidad, despiece)
     return despiece
-
 
 def parse_panel_code(code):
     """
@@ -972,8 +529,8 @@ def parse_panel_code(code):
       - nums: lista de enteros en orden de aparición
       - partes: lista de strings separadas por 'X'
     """
-    base = code.split("-", 1)[0]  # quita sufijos después de "-"
-    m = re.match(r"([A-Za-z_]+)", base)  # soporta letras y guiones bajos
+    base = code.split("-", 1)[0]              # quita sufijos después de "-"
+    m = re.match(r"([A-Za-z_]+)", base)       # soporta letras y guiones bajos
     tipo = m.group(1) if m else ""
     nums = list(map(int, re.findall(r"\d+", base)))
     partes = re.split(r"[xX]", base)
@@ -981,10 +538,12 @@ def parse_panel_code(code):
     # --- Normalización de tipos equivalentes ---
     if tipo in ("ICC", "IC_Chico"):
         tipo = "IC"
-    elif tipo in ("OCC", "OC_Chico", "OCH"):
+    elif tipo in ("OCC", "OC_Chico","OCH"):
         tipo = "OC"
 
     return {"tipo": tipo, "base": base, "nums": nums, "partes": partes}
+
+
 
 
 def calcular_totales_perfiles(despiece):
@@ -1020,7 +579,7 @@ def calcular_materia_prima_por_perfil(despiece, longitud_perfil=5850):
         count = item["numero_piezas"]
         piezas_por_perfil.setdefault(perfil, [])
         piezas_por_perfil[perfil].extend([largo] * count)
-
+    
     resultados = {}
     for perfil, piezas in piezas_por_perfil.items():
         piezas.sort(reverse=True)
@@ -1059,8 +618,8 @@ def calcular_tiempos_por_panel(
     despiece,
     tiempo_por_corte_min=1.0,
     velocidad_soldadura_mm_por_min=50.0,
-    tiempos_perforacion_por_tipo=None,
-):
+    tiempos_perforacion_por_tipo=None):
+  
     if tiempos_perforacion_por_tipo is None:
         tiempos_perforacion_por_tipo = {}
 
@@ -1078,11 +637,7 @@ def calcular_tiempos_por_panel(
     for panel, cortes in cortes_por_panel.items():
         t_corte = cortes * tiempo_por_corte_min
         mm_sold = soldadura_mm_por_panel.get(panel, 0)
-        t_sold = (
-            mm_sold / velocidad_soldadura_mm_por_min
-            if velocidad_soldadura_mm_por_min > 0
-            else 0
-        )
+        t_sold = mm_sold / velocidad_soldadura_mm_por_min if velocidad_soldadura_mm_por_min > 0 else 0
 
         m = re.match(r"([A-Za-z]+)", panel)
         tipo = m.group(1) if m else panel
@@ -1093,12 +648,11 @@ def calcular_tiempos_por_panel(
             "tiempo_corte_min": t_corte,
             "tiempo_soldadura_min": t_sold,
             "tiempo_perforacion_min": t_perfor,
-            "tiempo_total_min": t_total,
+            "tiempo_total_min": t_total
         }
         tiempo_total_general += t_total
 
     return tiempos_panel, tiempo_total_general
-
 
 def calcular_costos_por_panel(
     despiece,
@@ -1107,7 +661,7 @@ def calcular_costos_por_panel(
     detalle_insumos=True,
     # --- NUEVO: costo de la energía y potencias de máquinas (puedes ajustar)
     costo_kwh_usd=0.20,
-    potencias_kw=None,
+    potencias_kw=None
 ):
     """
     Calcula costos por panel e incluye detalle de insumos (cantidad y costo),
@@ -1122,60 +676,56 @@ def calcular_costos_por_panel(
     # --- Parámetros base ---
     costo_aluminio_usd_por_kg = 3.828
     peso_por_perfil = {
-        "ALA_LOSA": 4.316,
-        "ALA_MURO": 4.480,
-        "BASTIDOR_LOSA_50": 1.064,
-        "BASTIDOR_LOSA_54": 1.129,
-        "BASTIDOR_MURO_50": 1.368,
-        "BASTIDOR_MURO_54": 1.284,
-        "BCPN": 3.754,
-        "BH120": 4.615,
-        "BH150": 5.034,
-        "CLN100": 5.072,
-        "CLN50": 5.023,
-        "CLN70": 5.294,
-        "ICN": 6.838,
-        "OCN": 2.745,
-        "REFUERZOCHICO": 1.200,
-        "REFUERZOGRANDE": 1.274,
-        "TUBO": 1.923,
+        'ALA_LOSA': 4.316, 'ALA_MURO': 4.480,
+        'BASTIDOR_LOSA_50': 1.064, 'BASTIDOR_LOSA_54': 1.129,
+        'BASTIDOR_MURO_50': 1.368, 'BASTIDOR_MURO_54': 1.284,
+        'BCPN': 3.754, 'BH120': 4.615, 'BH150': 5.034,
+        'CLN100': 5.072, 'CLN50': 5.023, 'CLN70': 5.294,
+        'ICN': 6.838, 'OCN': 2.745,
+        'REFUERZOCHICO': 1.200, 'REFUERZOGRANDE': 1.274,
+        'TUBO': 1.923
     }
     materia_prima_por_mm = {
-        p: (w / 1000.0) * costo_aluminio_usd_por_kg for p, w in peso_por_perfil.items()
+        p: (w / 1000.0) * costo_aluminio_usd_por_kg
+        for p, w in peso_por_perfil.items()
     }
     mano_obra = {
-        "corte": 5056.0 / 60.0,
-        "soldadura": 6611.0 / 60.0,
-        "perforacion": 3889.0 / 60.0,
+        'corte': 5056.0/60.0,
+        'soldadura': 6611.0/60.0,
+        'perforacion': 3889.0/60.0
     }
 
     # --- NUEVO: potencias (kW) por proceso; ajusta a tus equipos reales
     # Ejemplo: sierra tronzadora 2.2 kW, soldadura MIG 5.0 kW, taladro/esmeril 1.5 kW
     if potencias_kw is None:
-        potencias_kw = {"corte": 5.0, "soldadura": 4.4, "perforacion": 25.0}
+        potencias_kw = {
+            'corte': 5.0,
+            'soldadura': 4.4,
+            'perforacion': 25.0
+        }
 
     # Insumos estándar (no eléctricos)
     insumos = {
-        "gas": {"costo": 12.77, "rendimiento": 575, "unidad": "m"},
-        "soldadura": {"costo": 17.62, "rendimiento": 150, "unidad": "m"},
-        "boquillas": {"costo": 0.84, "rendimiento": 150, "unidad": "m"},
-        "teflon": {"costo": 13.37, "rendimiento": 900, "unidad": "m"},
-        "tobera": {"costo": 4.57, "rendimiento": 750, "unidad": "m"},
-        "espiral": {"costo": 6.73, "rendimiento": 750, "unidad": "m"},
-        "difusor": {"costo": 2.42, "rendimiento": 750, "unidad": "m"},
-        "discos_lija": {"costo": 1.91, "rendimiento": 75, "unidad": "m"},
-        "discos_corte": {"costo": 1.06, "rendimiento": 750, "unidad": "m"},
-        "esmeril": {"costo": 37.23, "rendimiento": 30000, "unidad": "m"},
+        'gas':          {'costo': 12.77, 'rendimiento': 575,   'unidad': 'm'},
+        'soldadura':    {'costo': 17.62, 'rendimiento': 150,   'unidad': 'm'},
+        'boquillas':    {'costo': 0.84,  'rendimiento': 150,   'unidad': 'm'},
+        'teflon':       {'costo': 13.37, 'rendimiento': 900,   'unidad': 'm'},
+        'tobera':       {'costo': 4.57,  'rendimiento': 750,   'unidad': 'm'},
+        'espiral':      {'costo': 6.73,  'rendimiento': 750,   'unidad': 'm'},
+        'difusor':      {'costo': 2.42,  'rendimiento': 750,   'unidad': 'm'},
+        'discos_lija':  {'costo': 1.91,  'rendimiento': 75,    'unidad': 'm'},
+        'discos_corte': {'costo': 1.06,  'rendimiento': 750,   'unidad': 'm'},
+        'esmeril':      {'costo': 37.23, 'rendimiento': 30000, 'unidad': 'm'},
     }
 
     # --- Agrupación preliminar (versión segura) ---
     materia_prima_por_panel = {}
     cortes_por_panel = {}
     for it in despiece:
-        p = it["panel"]
+        p = it['panel']
         d = materia_prima_por_panel.setdefault(p, {})
-        d[it["perfil"]] = d.get(it["perfil"], 0) + it["total_mm"]
-        cortes_por_panel[p] = cortes_por_panel.get(p, 0) + it["numero_piezas"]
+        d[it['perfil']] = d.get(it['perfil'], 0) + it['total_mm']
+        cortes_por_panel[p] = cortes_por_panel.get(p, 0) + it['numero_piezas']
 
     # --- Longitud de soldadura por panel ---
     soldadura_mm_por_panel = calcular_soldadura_por_panel(despiece)
@@ -1188,20 +738,18 @@ def calcular_costos_por_panel(
     # --- Cálculo por panel ---
     for panel, perfiles_mm in materia_prima_por_panel.items():
         # Materia prima
-        costo_mp = sum(
-            mm * materia_prima_por_mm.get(perfil, 0)
-            for perfil, mm in perfiles_mm.items()
-        )
+        costo_mp = sum(mm * materia_prima_por_mm.get(perfil, 0)
+                        for perfil, mm in perfiles_mm.items())
 
         # Mano de obra
         t = tiempos_por_panel.get(panel, {})
-        t_corte_min = t.get("tiempo_corte_min", 0.0)
-        t_sold_min = t.get("tiempo_soldadura_min", 0.0)
-        t_perf_min = t.get("tiempo_perforacion_min", 0.0)
+        t_corte_min = t.get('tiempo_corte_min', 0.0)
+        t_sold_min  = t.get('tiempo_soldadura_min', 0.0)
+        t_perf_min  = t.get('tiempo_perforacion_min', 0.0)
 
-        costo_mo_c = t_corte_min * mano_obra["corte"] / tasa_clp_usd
-        costo_mo_s = t_sold_min * mano_obra["soldadura"] / tasa_clp_usd
-        costo_mo_p = t_perf_min * mano_obra["perforacion"] / tasa_clp_usd
+        costo_mo_c = t_corte_min * mano_obra['corte'] / tasa_clp_usd
+        costo_mo_s = t_sold_min  * mano_obra['soldadura'] / tasa_clp_usd
+        costo_mo_p = t_perf_min  * mano_obra['perforacion'] / tasa_clp_usd
 
         # Insumos estándar
         soldadura_length = soldadura_mm_por_panel.get(panel, 0)
@@ -1212,28 +760,28 @@ def calcular_costos_por_panel(
         costo_insumos = 0.0
 
         sold_mm = soldadura_length
-        sold_m = sold_mm / 1000.0
-        t_sold = t_sold_min
-        cortes = num_cortes
+        sold_m  = sold_mm / 1000.0
+        t_sold  = t_sold_min
+        cortes  = num_cortes
 
         for nombre, cfg in insumos.items():
-            rend = cfg.get("rendimiento", 0) or 0
-            unidad = cfg.get("unidad", "m")
+            rend = cfg.get('rendimiento', 0) or 0
+            unidad = cfg.get('unidad', 'm')
 
             if rend <= 0:
                 uds = 0.0
-            elif unidad == "m":
+            elif unidad == 'm':
                 uds = sold_m / rend
-            elif unidad == "mm":
+            elif unidad == 'mm':
                 uds = sold_mm / rend
-            elif unidad == "min":
+            elif unidad == 'min':
                 uds = t_sold / rend
-            elif unidad == "corte":
+            elif unidad == 'corte':
                 uds = cortes / rend
             else:
                 uds = sold_m / rend
 
-            costo = uds * cfg["costo"]
+            costo = uds * cfg['costo']
             detalle_unidades[panel][nombre] = round(uds, 3)
             detalle_costos[panel][nombre] = costo
             costo_insumos += costo
@@ -1246,12 +794,12 @@ def calcular_costos_por_panel(
         def _agregar_ojales_remaches(alto_mm):
             ojal_count = (alto_mm // 300) * 2
             remache_count = ojal_count * 2
-            detalle_unidades[panel]["ojales"] = ojal_count
+            detalle_unidades[panel]['ojales'] = ojal_count
             cost_ojal = ojal_count * 0.927
-            detalle_costos[panel]["ojales"] = cost_ojal
-            detalle_unidades[panel]["remaches"] = remache_count
+            detalle_costos[panel]['ojales'] = cost_ojal
+            detalle_unidades[panel]['remaches'] = remache_count
             cost_rem = remache_count * 0.135
-            detalle_costos[panel]["remaches"] = cost_rem
+            detalle_costos[panel]['remaches'] = cost_rem
             return cost_ojal + cost_rem
 
         if tipo_p == "WF":
@@ -1264,33 +812,29 @@ def calcular_costos_por_panel(
                     costo_insumos += _agregar_ojales_remaches(alto_mm)
 
         # --- NUEVO: Energía eléctrica (kWh y costo) ---
-        kwh_corte = (t_corte_min / 60.0) * (potencias_kw.get("corte", 0.0) or 0.0)
-        kwh_sold = (t_sold_min / 60.0) * (potencias_kw.get("soldadura", 0.0) or 0.0)
-        kwh_perf = (t_perf_min / 60.0) * (potencias_kw.get("perforacion", 0.0) or 0.0)
+        kwh_corte = (t_corte_min / 60.0) * (potencias_kw.get('corte', 0.0) or 0.0)
+        kwh_sold  = (t_sold_min  / 60.0) * (potencias_kw.get('soldadura', 0.0) or 0.0)
+        kwh_perf  = (t_perf_min  / 60.0) * (potencias_kw.get('perforacion', 0.0) or 0.0)
         energia_kwh = kwh_corte + kwh_sold + kwh_perf
         costo_energia = energia_kwh * costo_kwh_usd
 
         # Guardar en detalle
-        detalle_unidades[panel]["energia_kwh"] = round(energia_kwh, 4)
-        detalle_costos[panel]["energia_usd"] = costo_energia
+        detalle_unidades[panel]['energia_kwh'] = round(energia_kwh, 4)
+        detalle_costos[panel]['energia_usd'] = costo_energia
 
         # Total por panel
         total_panel = (
-            costo_mp
-            + costo_mo_c
-            + costo_mo_s
-            + costo_mo_p
-            + costo_insumos
-            + costo_energia
+            costo_mp + costo_mo_c + costo_mo_s + costo_mo_p +
+            costo_insumos + costo_energia
         )
         costos_por_panel[panel] = {
-            "costo_mp_usd": costo_mp,
-            "costo_mo_corte_usd": costo_mo_c,
-            "costo_mo_sold_usd": costo_mo_s,
-            "costo_mo_perf_usd": costo_mo_p,
-            "costo_insumos_usd": costo_insumos,
-            "costo_energia_usd": costo_energia,  # ← NUEVO
-            "costo_total_usd": total_panel,
+            'costo_mp_usd': costo_mp,
+            'costo_mo_corte_usd': costo_mo_c,
+            'costo_mo_sold_usd':  costo_mo_s,
+            'costo_mo_perf_usd':  costo_mo_p,
+            'costo_insumos_usd':  costo_insumos,
+            'costo_energia_usd':  costo_energia,   # ← NUEVO
+            'costo_total_usd':   total_panel
         }
         total_general_usd += total_panel
 
@@ -1298,20 +842,26 @@ def calcular_costos_por_panel(
 
 
 def calcular_detalle_insumos(detalle_costos, detalle_unidades):
+
     detalle_por_pieza = {}
     total_pedido = {}
 
     for panel, costos in detalle_costos.items():
         detalle_por_pieza[panel] = {}
-        for insumo, costo in costos.items():  # << ahora usa 'costos'
+        for insumo, costo in costos.items():            # << ahora usa 'costos'
             uds = detalle_unidades.get(panel, {}).get(insumo, 0)
-            detalle_por_pieza[panel][insumo] = {"cantidad": uds, "costo_usd": costo}
+            detalle_por_pieza[panel][insumo] = {
+                'cantidad': uds,
+                'costo_usd': costo
+            }
             if insumo not in total_pedido:
-                total_pedido[insumo] = {"cantidad_total": 0, "costo_total_usd": 0.0}
-            total_pedido[insumo]["cantidad_total"] += uds
-            total_pedido[insumo]["costo_total_usd"] += costo
+                total_pedido[insumo] = {'cantidad_total': 0, 'costo_total_usd': 0.0}
+            total_pedido[insumo]['cantidad_total'] += uds
+            total_pedido[insumo]['costo_total_usd'] += costo
+
 
     return detalle_por_pieza, total_pedido
+
 
 
 def calcular_soldadura_por_panel(despiece):
@@ -1325,9 +875,7 @@ def calcular_soldadura_por_panel(despiece):
 
     for panel, items in paneles.items():
         soldadura_total = 0
-        ala_muro_contado = (
-            False  # ALA_MURO / ALA_LOSA se cuentan una sola vez (tu regla actual)
-        )
+        ala_muro_contado = False  # ALA_MURO / ALA_LOSA se cuentan una sola vez (tu regla actual)
 
         # Info base del código (tipo, números, etc.)
         info = parse_panel_code(panel)
@@ -1430,7 +978,6 @@ def calcular_soldadura_por_panel(despiece):
 
     return soldadura_por_panel
 
-
 # === Función para calcular área ===
 def calcular_area(dimensiones):
     """
@@ -1455,23 +1002,21 @@ def calcular_area(dimensiones):
     area = ancho * largo / 1_000_000
     return ancho, largo, area
 
-
 # === Función para leer cantidades y calcular áreas ===
-def calcular_areas_por_panel(input_csv="paneles.csv"):
+def calcular_areas_por_panel(input_csv='paneles.csv'):
     panel_counts = {}
-    with open(input_csv, mode="r") as f:
+    with open(input_csv, mode='r') as f:
         reader = csv.reader(f)
         next(reader, None)  # Saltar encabezado
         for row in reader:
             if not row:
                 continue
             panel, cant = row[0], row[1]
-            cantidad = (
-                int(re.sub(r"\D", "", cant)) if re.search(r"\d", cant or "") else 0
-            )
+            cantidad = int(re.sub(r"\D", "", cant)) if re.search(r"\d", cant or "") else 0
             if cantidad == 0:
                 continue
             panel_counts[panel] = cantidad
+            
 
     areas = {}
     for panel, cantidad in panel_counts.items():
@@ -1481,16 +1026,15 @@ def calcular_areas_por_panel(input_csv="paneles.csv"):
         if area <= 0:
             continue
         areas[base] = {
-            "ancho_mm": ancho,
-            "largo_mm": largo,
-            "area_m2": area,
-            "cantidad": cantidad,
-            "area_total_m2": area * cantidad,
+            'ancho_mm': ancho,
+            'largo_mm': largo,
+            'area_m2': area,
+            'cantidad': cantidad,
+            'area_total_m2': area * cantidad
         }
 
     return areas
-
-
+    
 def calcular_areas_por_base(cantidades_por_base):
     filas = []
     total_area = 0.0
@@ -1499,14 +1043,12 @@ def calcular_areas_por_base(cantidades_por_base):
         if area_unit <= 0:
             continue
         area_total = area_unit * cant
-        filas.append(
-            {
-                "Panel (base)": base,
-                "Cantidad": cant,
-                "Área panel (m²)": round(area_unit, 3),
-                "Área total (m²)": round(area_total, 3),
-            }
-        )
+        filas.append({
+            'Panel (base)': base,
+            'Cantidad': cant,
+            'Área panel (m²)': round(area_unit, 3),
+            'Área total (m²)': round(area_total, 3),
+        })
         total_area += area_total
     return filas, total_area
 
@@ -1517,8 +1059,8 @@ def resumen_totales_pedido(
     tiempo_total_general,
     costos_por_panel,
     total_general_usd,
-    input_csv="paneles.csv",
-    cantidades_por_base=None,
+    input_csv='paneles.csv',
+    cantidades_por_base=None
 ):
     """
     Resumen global del pedido ALINEADO con el cálculo por BASE:
@@ -1530,14 +1072,13 @@ def resumen_totales_pedido(
       - costo_promedio_usd_m2
     """
     # 1) Total piezas del despiece
-    total_piezas_despiece = sum(it.get("numero_piezas", 0) for it in resultado_despiece)
+    total_piezas_despiece = sum(it.get('numero_piezas', 0) for it in resultado_despiece)
 
     # 2) Si no viene el agrupado, lo construimos
     if cantidades_por_base is None:
         from collections import defaultdict
-
         cantidades_por_base = defaultdict(int)
-        with open(input_csv, mode="r") as f:
+        with open(input_csv, mode='r') as f:
             reader = csv.reader(f)
             next(reader, None)
             for row in reader:
@@ -1565,50 +1106,35 @@ def resumen_totales_pedido(
     total_tiempo_dias = total_tiempo_horas / 8.0 if total_tiempo_horas > 0 else 0.0
 
     # 6) Promedio USD/m²
-    costo_promedio_usd_m2 = (
-        (total_costo_usd / total_area_m2) if total_area_m2 > 0 else 0.0
-    )
+    costo_promedio_usd_m2 = (total_costo_usd / total_area_m2) if total_area_m2 > 0 else 0.0
 
     return {
-        "total_piezas_despiece": total_piezas_despiece,
-        "total_paneles": total_paneles,
-        "total_area_m2": total_area_m2,
-        "total_costo_usd": total_costo_usd,
-        "total_tiempo_min": total_tiempo_min,
-        "total_tiempo_horas": total_tiempo_horas,
-        "total_tiempo_dias": total_tiempo_dias,
-        "costo_promedio_usd_m2": costo_promedio_usd_m2,
+        'total_piezas_despiece': total_piezas_despiece,
+        'total_paneles': total_paneles,
+        'total_area_m2': total_area_m2,
+        'total_costo_usd': total_costo_usd,
+        'total_tiempo_min': total_tiempo_min,
+        'total_tiempo_horas': total_tiempo_horas,
+        'total_tiempo_dias': total_tiempo_dias,
+        'costo_promedio_usd_m2': costo_promedio_usd_m2,
     }
 
 
-def menu_exportacion(
-    resultado_despiece, cantidades_por_base, df_pedido, input_csv="paneles.csv"
-):
+def menu_exportacion(resultado_despiece, cantidades_por_base, df_pedido, input_csv='paneles.csv'):
+
     desired_order = [
-        "ALA_LOSA",
-        "ALA_MURO",
-        "BASTIDOR_LOSA_50",
-        "BASTIDOR_LOSA_54",
-        "BASTIDOR_MURO_50",
-        "BASTIDOR_MURO_54",
-        "BCPN",
-        "BH120",
-        "BH150",
-        "CLN50",
-        "CLN70",
-        "CLN100",
-        "ICN",
-        "OCN",
-        "REFUERZOCHICO",
-        "REFUERZOGRANDE",
-        "TUBO",
+        "ALA_LOSA", "ALA_MURO","BASTIDOR_LOSA_50", "BASTIDOR_LOSA_54",
+        "BASTIDOR_MURO_50", "BASTIDOR_MURO_54","BCPN", "BH120", "BH150",
+        "CLN50", "CLN70", "CLN100","ICN", "OCN",
+        "REFUERZOCHICO", "REFUERZOGRANDE","TUBO"
     ]
 
     # Valores por defecto y tiempos predefinidos
     tiempo_por_corte = 1.25
     velocidad_sold = 200.0
     entrada = (
-        "WF:2,SF:2,MF:2,CL:0.2,CLI:1.5,CLE:1.5,IC:4,OC:1,BH:5,BCP:1,CP:0.9,CE:0.6,CS:1"
+        "WF:2,SF:2,MF:2,CL:0.2,CLI:1.5,CLE:1.5,IC:4,OC:1,"
+        "BH:5,BCP:1,CP:0.9,CE:0.6,CS:1"
     )
     tiempos_perforacion_por_tipo = {}
     for parte in entrada.split(","):
@@ -1623,8 +1149,7 @@ def menu_exportacion(
         resultado_despiece,
         tiempo_por_corte_min=tiempo_por_corte,
         velocidad_soldadura_mm_por_min=velocidad_sold,
-        tiempos_perforacion_por_tipo=tiempos_perforacion_por_tipo,
-    )
+        tiempos_perforacion_por_tipo=tiempos_perforacion_por_tipo)
 
     # Pedir tasa con validación
     while True:
@@ -1637,29 +1162,27 @@ def menu_exportacion(
         except ValueError:
             print("⚠️ Ingresa un número válido (ej: 970).")
 
-    costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = (
+    costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = \
         calcular_costos_por_panel(resultado_despiece, tiempos_panel, tasa, True)
-    )
 
     detalle_por_pieza, total_insumos_pedido = calcular_detalle_insumos(
-        detalle_costos, detalle_unidades
+        detalle_costos,
+        detalle_unidades
     )
     resumen = resumen_totales_pedido(
-        resultado_despiece=resultado_despiece,
-        tiempos_panel=tiempos_panel,
-        tiempo_total_general=tiempo_total_general,
-        costos_por_panel=costos_por_panel,
-        total_general_usd=total_general_usd,
-        input_csv=input_csv,
-        cantidades_por_base=cantidades_por_base,  # 👈 ¡clave!
-    )
+    resultado_despiece=resultado_despiece,
+    tiempos_panel=tiempos_panel,
+    tiempo_total_general=tiempo_total_general,
+    costos_por_panel=costos_por_panel,
+    total_general_usd=total_general_usd,
+    input_csv=input_csv,
+    cantidades_por_base=cantidades_por_base  # 👈 ¡clave!
+)
 
     # --- Autotest rápido de consistencia de área ---
     filas_area_test, total_area_test = calcular_areas_por_base(cantidades_por_base)
-    if abs(resumen["total_area_m2"] - total_area_test) > 1e-9:
-        print(
-            f"⚠️ Inconsistencia de área. Resumen={resumen['total_area_m2']:.3f} vs cálculo por BASE={total_area_test:.3f}"
-        )
+    if abs(resumen['total_area_m2'] - total_area_test) > 1e-9:
+        print(f"⚠️ Inconsistencia de área. Resumen={resumen['total_area_m2']:.3f} vs cálculo por BASE={total_area_test:.3f}")
     else:
         print(f"✓ Área consistente: {total_area_test:.3f} m²")
     while True:
@@ -1685,13 +1208,9 @@ def menu_exportacion(
         # 1) Despiece detallado
         if opcion in ("1", "12"):
             print("\n=== Despiece detallado ===")
-            print(
-                f"{'Panel':<15} {'Perfil':<35} {'Piezas':<8} {'Largo(mm)':<10} {'Total(mm)':<10}"
-            )
+            print(f"{'Panel':<15} {'Perfil':<35} {'Piezas':<8} {'Largo(mm)':<10} {'Total(mm)':<10}")
             for item in resultado_despiece:
-                print(
-                    f"{item['panel']:<15} {item['perfil']:<35} {item['numero_piezas']:<8} {item['largo_pieza_mm']:<10} {item['total_mm']:<10}"
-                )
+                print(f"{item['panel']:<15} {item['perfil']:<35} {item['numero_piezas']:<8} {item['largo_pieza_mm']:<10} {item['total_mm']:<10}")
 
         # 2) Totales de perfiles
         if opcion in ("2", "12"):
@@ -1699,60 +1218,39 @@ def menu_exportacion(
             print("\n=== Totales de perfiles ===")
             print(f"{'Perfil':<35} {'Piezas totales':<15} {'Total(mm)':<10}")
             for perfil, datos in totales.items():
-                print(
-                    f"{perfil:<35} {datos['numero_piezas']:<15} {datos['total_mm']:<10}"
-                )
+                print(f"{perfil:<35} {datos['numero_piezas']:<15} {datos['total_mm']:<10}")
 
         # 3) Totales por medida
         if opcion in ("3", "12"):
             totales_medida = calcular_totales_por_medida(resultado_despiece)
             print("\n=== Totales por medida (Perfil + Largo) ===")
-            print(
-                f"{'Perfil':<35} {'Largo(mm)':<10} {'Piezas totales':<15} {'Total(mm)':<10}"
-            )
+            print(f"{'Perfil':<35} {'Largo(mm)':<10} {'Piezas totales':<15} {'Total(mm)':<10}")
             for (perfil, largo), datos in sorted(
                 totales_medida.items(), key=lambda x: (x[0][0].lower(), x[0][1])
             ):
-                print(
-                    f"{perfil:<35} {largo:<10} {datos['numero_piezas']:<15} {datos['total_mm']:<10}"
-                )
+                print(f"{perfil:<35} {largo:<10} {datos['numero_piezas']:<15} {datos['total_mm']:<10}")
 
         # 4) Materia prima por perfil (unificado con totales de perfiles)
         if opcion in ("4", "12"):
-            totales = calcular_totales_perfiles(
-                resultado_despiece
-            )  # {perfil: {numero_piezas, total_mm}}
-            materia_prima = calcular_materia_prima_por_perfil(
-                resultado_despiece, longitud_perfil=5850
-            )
-
+            totales = calcular_totales_perfiles(resultado_despiece)  # {perfil: {numero_piezas, total_mm}}
+            materia_prima = calcular_materia_prima_por_perfil(resultado_despiece, longitud_perfil=5850)
+        
             print("\n=== Materia Prima necesaria por perfil (incluye totales) ===")
-            print(
-                f"{'Perfil':<35} {'Piezas totales':>15} {'Total(mm)':>12} {'Perfiles necesarios':>22} {'Waste (mm)':>12}"
-            )
-
+            print(f"{'Perfil':<35} {'Piezas totales':>15} {'Total(mm)':>12} {'Perfiles necesarios':>22} {'Waste (mm)':>12}")
+        
             # primero en el orden deseado
             for perfil in desired_order:
                 d_tot = totales.get(perfil, {"numero_piezas": 0, "total_mm": 0})
-                d_mp = materia_prima.get(perfil, {"num_perfiles": 0, "waste_mm": 0})
-                print(
-                    f"{perfil:<35} {d_tot['numero_piezas']:>15} {d_tot['total_mm']:>12} {d_mp['num_perfiles']:>22} {d_mp['waste_mm']:>12}"
-                )
-
+                d_mp  = materia_prima.get(perfil, {"num_perfiles": 0, "waste_mm": 0})
+                print(f"{perfil:<35} {d_tot['numero_piezas']:>15} {d_tot['total_mm']:>12} {d_mp['num_perfiles']:>22} {d_mp['waste_mm']:>12}")
+        
             # luego los que no están en desired_order (orden alfabético)
-            otros = sorted(
-                [
-                    p
-                    for p in set(list(totales.keys()) + list(materia_prima.keys()))
-                    if p not in desired_order
-                ]
-            )
+            otros = sorted([p for p in set(list(totales.keys()) + list(materia_prima.keys())) if p not in desired_order])
             for p in otros:
                 d_tot = totales.get(p, {"numero_piezas": 0, "total_mm": 0})
-                d_mp = materia_prima.get(p, {"num_perfiles": 0, "waste_mm": 0})
-                print(
-                    f"{p:<35} {d_tot['numero_piezas']:>15} {d_tot['total_mm']:>12} {d_mp['num_perfiles']:>22} {d_mp['waste_mm']:>12}"
-                )
+                d_mp  = materia_prima.get(p, {"num_perfiles": 0, "waste_mm": 0})
+                print(f"{p:<35} {d_tot['numero_piezas']:>15} {d_tot['total_mm']:>12} {d_mp['num_perfiles']:>22} {d_mp['waste_mm']:>12}")
+
 
         # 5) Soldadura por panel
         if opcion in ("5", "12"):
@@ -1767,16 +1265,12 @@ def menu_exportacion(
             print("\n=== Tiempos por PANEL (min) ===")
             print(f"{'Panel':<15} {'Corte':>6} {'Sold.':>6} {'Perf.':>6} {'Total':>6}")
             for panel, d in tiempos_panel.items():
-                print(
-                    f"{panel:<15} {d['tiempo_corte_min']:6.2f} {d['tiempo_soldadura_min']:6.2f} {d['tiempo_perforacion_min']:6.2f} {d['tiempo_total_min']:6.2f}"
-                )
-            print(f"\nTiempo TOTAL fabricación: {tiempo_total_general / 60:.2f} horas")
-
+                print(f"{panel:<15} {d['tiempo_corte_min']:6.2f} {d['tiempo_soldadura_min']:6.2f} {d['tiempo_perforacion_min']:6.2f} {d['tiempo_total_min']:6.2f}")
+            print(f"\nTiempo TOTAL fabricación: {tiempo_total_general/60:.2f} horas")
+        
         # 7) Costos por panel (fusionado con USD/m² + resumen del pedido)
         if opcion in ("7", "12"):
-            print(
-                "\n=== Costos por panel (agrupado por BASE) — incluye USD/m² unit y resumen del pedido ==="
-            )
+            print("\n=== Costos por panel (agrupado por BASE) — incluye USD/m² unit y resumen del pedido ===")
             header = (
                 f"{'Panel (base)':<20}"
                 f"{'Cant.':>8}"
@@ -1786,75 +1280,48 @@ def menu_exportacion(
                 f"{'MP (USD)':>12}"
                 f"{'MO (USD)':>12}"
                 f"{'Insumos (USD)':>16}"
-                f"{'Energía (USD)':>16}"  # ← NUEVO
+                f"{'Energía (USD)':>16}"   # ← NUEVO
                 f"{'Total (USD)':>14}"
             )
 
             print(header)
-
+        
             total_area = 0.0
             total_costo = 0.0
             total_unidades = 0
-
+        
             def _mo_total(d):
-                return (
-                    d.get("costo_mo_corte_usd", 0.0)
-                    + d.get("costo_mo_sold_usd", 0.0)
-                    + d.get("costo_mo_perf_usd", 0.0)
-                )
-
+                return (d.get('costo_mo_corte_usd', 0.0) +
+                        d.get('costo_mo_sold_usd', 0.0) +
+                        d.get('costo_mo_perf_usd', 0.0))
+        
             filas = []
-            for base, cant_total in sorted(
-                cantidades_por_base.items(), key=lambda x: x[0].lower()
-            ):
+            for base, cant_total in sorted(cantidades_por_base.items(), key=lambda x: x[0].lower()):
                 if cant_total <= 0:
                     continue
                 info = parse_panel_code(base)
                 _, _, area_unit = calcular_area(info["nums"])
                 if area_unit <= 0:
                     continue
-
+        
                 dcost = costos_por_panel.get(base, {})
-                total_base = dcost.get("costo_total_usd", 0.0) or 0.0
-                mp_total = dcost.get("costo_mp_usd", 0.0) or 0.0
-                mo_total = _mo_total(dcost)
-                ins_total = dcost.get("costo_insumos_usd", 0.0) or 0.0
-                energia_total = dcost.get("costo_energia_usd", 0.0) or 0.0  # ← NUEVO
+                total_base = dcost.get('costo_total_usd', 0.0) or 0.0
+                mp_total   = dcost.get('costo_mp_usd', 0.0) or 0.0
+                mo_total   = _mo_total(dcost)
+                ins_total  = dcost.get('costo_insumos_usd', 0.0) or 0.0
+                energia_total = dcost.get('costo_energia_usd', 0.0) or 0.0  # ← NUEVO
 
-                costo_unit = total_base / cant_total
-                usd_m2_unit = costo_unit / area_unit
+                costo_unit   = total_base / cant_total
+                usd_m2_unit  = costo_unit / area_unit
 
                 total_unidades += cant_total
-                total_area += area_unit * cant_total
-                total_costo += total_base
+                total_area     += area_unit * cant_total
+                total_costo    += total_base
 
-                filas.append(
-                    (
-                        base,
-                        cant_total,
-                        area_unit,
-                        costo_unit,
-                        usd_m2_unit,
-                        mp_total,
-                        mo_total,
-                        ins_total,
-                        energia_total,
-                        total_base,
-                    )
-                )
+                filas.append((base, cant_total, area_unit, costo_unit, usd_m2_unit,
+                              mp_total, mo_total, ins_total, energia_total, total_base))
 
-            for (
-                base,
-                cant,
-                area_unit,
-                costo_unit,
-                usd_m2_unit,
-                mp_total,
-                mo_total,
-                ins_total,
-                energia_total,
-                total_base,
-            ) in filas:
+            for base, cant, area_unit, costo_unit, usd_m2_unit, mp_total, mo_total, ins_total, energia_total, total_base in filas:
                 print(
                     f"{base:<20}"
                     f"{cant:>8}"
@@ -1864,10 +1331,11 @@ def menu_exportacion(
                     f"{mp_total:>12.2f}"
                     f"{mo_total:>12.2f}"
                     f"{ins_total:>16.2f}"
-                    f"{energia_total:>16.2f}"  # ← NUEVO
+                    f"{energia_total:>16.2f}"   # ← NUEVO
                     f"{total_base:>14.2f}"
                 )
 
+        
             precio_medio = (total_costo / total_area) if total_area > 0 else 0.0
             print("\n--- Resumen del pedido ---")
             print(f"Unidades totales           : {total_unidades}")
@@ -1875,75 +1343,61 @@ def menu_exportacion(
             print(f"Costo TOTAL pedido (USD)   : {total_costo:.2f}")
             print(f"Precio medio (USD/m²)      : {precio_medio:.2f}\n")
 
+
+
         # 8) Detalle de insumos
         if opcion in ("8", "12"):
             print("\n=== Detalle de insumos POR PIEZA ===")
             print(f"{'Panel':<15}{'Insumo':<15}{'Cantidad':>10}{'Costo USD':>12}")
             for panel, insumos in detalle_por_pieza.items():
                 for nombre, datos in insumos.items():
-                    cantidad = datos["cantidad"]
-                    costo_usd = datos["costo_usd"]
+                    cantidad = datos['cantidad']
+                    costo_usd = datos['costo_usd']
                     print(f"{panel:<15}{nombre:<15}{cantidad:>10.3f}{costo_usd:>12.2f}")
             print("\n=== Total insumos TODO PEDIDO ===")
             print(f"{'Insumo':<15}{'Cant. Total':>12}{'Costo Total USD':>16}")
             for nombre, tot in total_insumos_pedido.items():
-                print(
-                    f"{nombre:<15}{tot['cantidad_total']:>12.3f}{tot['costo_total_usd']:>16.2f}"
-                )
+                print(f"{nombre:<15}{tot['cantidad_total']:>12.3f}{tot['costo_total_usd']:>16.2f}")
 
         # 9) Cálculo de área (AGRUPADO por BASE)
         if opcion in ("9", "12"):
             filas_area, total_area_pedido = calcular_areas_por_base(cantidades_por_base)
             print("\n=== Área por panel (agrupado por BASE) ===")
-            print(
-                f"{'Panel (base)':<20}{'Cant.':>8}{'Área panel (m²)':>16}{'Área total (m²)':>18}"
-            )
+            print(f"{'Panel (base)':<20}{'Cant.':>8}{'Área panel (m²)':>16}{'Área total (m²)':>18}")
             for r in filas_area:
-                print(
-                    f"{r['Panel (base)']:<20}{r['Cantidad']:>8}{r['Área panel (m²)']:>16.3f}{r['Área total (m²)']:>18.3f}"
-                )
+                print(f"{r['Panel (base)']:<20}{r['Cantidad']:>8}{r['Área panel (m²)']:>16.3f}{r['Área total (m²)']:>18.3f}")
             print(f"\nÁrea TOTAL del pedido (m²): {total_area_pedido:.3f}")
 
+    
+        
         # 11) Resumen global
         if opcion in ("11", "12"):
             print("\n=== Resumen global del pedido ===")
-            print(
-                f"{'Total piezas (despiece)':<30}: {resumen['total_piezas_despiece']}"
-            )
+            print(f"{'Total piezas (despiece)':<30}: {resumen['total_piezas_despiece']}")
             print(f"{'Total paneles (CSV)':<30}: {resumen['total_paneles']}")
             print(f"{'Área total (m²)':<30}: {resumen['total_area_m2']:.3f}")
             print(f"{'Costo total (USD)':<30}: {resumen['total_costo_usd']:.2f}")
-            print(
-                f"{'Costo promedio (USD/m²)':<30}: {resumen['costo_promedio_usd_m2']:.2f}"
-            )
+            print(f"{'Costo promedio (USD/m²)':<30}: {resumen['costo_promedio_usd_m2']:.2f}")
             print(f"{'Tiempo total (min)':<30}: {resumen['total_tiempo_min']:.2f}")
             print(f"{'Tiempo total (horas)':<30}: {resumen['total_tiempo_horas']:.2f}")
-            print(
-                f"{'Tiempo total (días, 8h)':<30}: {resumen['total_tiempo_dias']:.2f}"
-            )
+            print(f"{'Tiempo total (días, 8h)':<30}: {resumen['total_tiempo_dias']:.2f}")
 
         # 12) Exportar TODO a Excel (además de imprimir)
         if opcion == "12":
             # Reconstruimos estructuras que usamos arriba
             totales = calcular_totales_perfiles(resultado_despiece)
-            materia_prima = calcular_materia_prima_por_perfil(
-                resultado_despiece, longitud_perfil=5850
-            )
+            materia_prima = calcular_materia_prima_por_perfil(resultado_despiece, longitud_perfil=5850)
             soldadura = calcular_soldadura_por_panel(resultado_despiece)
 
             # Áreas por BASE (misma lógica que opción 9 y resumen)
-            filas_area_base, total_area_base = calcular_areas_por_base(
-                cantidades_por_base
-            )
+            filas_area_base, total_area_base = calcular_areas_por_base(cantidades_por_base)
 
             with pd.ExcelWriter("reporte_completo.xlsx", engine="openpyxl") as writer:
                 # 0) Pedido agrupado
                 df_pedido.to_excel(writer, sheet_name="Pedido_agrupado", index=False)
 
                 # 1) Despiece detallado
-                pd.DataFrame(resultado_despiece).to_excel(
-                    writer, sheet_name="Despiece", index=False
-                )
+                pd.DataFrame(resultado_despiece).to_excel(writer, sheet_name="Despiece", index=False)
 
                 # 2) Materia prima (unificada con totales)
                 filas_mp = []
@@ -1951,38 +1405,26 @@ def menu_exportacion(
                 for perfil in desired_order:
                     t = totales.get(perfil, {"numero_piezas": 0, "total_mm": 0})
                     m = materia_prima.get(perfil, {"num_perfiles": 0, "waste_mm": 0})
-                    filas_mp.append(
-                        {
-                            "Perfil": perfil,
-                            "Piezas totales": t["numero_piezas"],
-                            "Total(mm)": t["total_mm"],
-                            "Perfiles necesarios (5850mm)": m["num_perfiles"],
-                            "Waste (mm)": m["waste_mm"],
-                        }
-                    )
+                    filas_mp.append({
+                        "Perfil": perfil,
+                        "Piezas totales": t["numero_piezas"],
+                        "Total(mm)": t["total_mm"],
+                        "Perfiles necesarios (5850mm)": m["num_perfiles"],
+                        "Waste (mm)": m["waste_mm"],
+                    })
                 # luego otros perfiles
-                otros = sorted(
-                    [
-                        p
-                        for p in set(list(totales.keys()) + list(materia_prima.keys()))
-                        if p not in desired_order
-                    ]
-                )
+                otros = sorted([p for p in set(list(totales.keys()) + list(materia_prima.keys())) if p not in desired_order])
                 for p in otros:
                     t = totales.get(p, {"numero_piezas": 0, "total_mm": 0})
                     m = materia_prima.get(p, {"num_perfiles": 0, "waste_mm": 0})
-                    filas_mp.append(
-                        {
-                            "Perfil": p,
-                            "Piezas totales": t["numero_piezas"],
-                            "Total(mm)": t["total_mm"],
-                            "Perfiles necesarios (5850mm)": m["num_perfiles"],
-                            "Waste (mm)": m["waste_mm"],
-                        }
-                    )
-                pd.DataFrame(filas_mp).to_excel(
-                    writer, sheet_name="Materia prima", index=False
-                )
+                    filas_mp.append({
+                        "Perfil": p,
+                        "Piezas totales": t["numero_piezas"],
+                        "Total(mm)": t["total_mm"],
+                        "Perfiles necesarios (5850mm)": m["num_perfiles"],
+                        "Waste (mm)": m["waste_mm"],
+                    })
+                pd.DataFrame(filas_mp).to_excel(writer, sheet_name="Materia prima", index=False)
 
                 # 3) Soldadura
                 pd.DataFrame(
@@ -1990,25 +1432,18 @@ def menu_exportacion(
                 ).to_excel(writer, sheet_name="Soldadura", index=False)
 
                 # 4) Tiempos por panel
-                df_tiempos = pd.DataFrame.from_dict(
-                    tiempos_panel, orient="index"
-                ).reset_index()
+                df_tiempos = pd.DataFrame.from_dict(tiempos_panel, orient="index").reset_index()
                 df_tiempos.rename(columns={"index": "Panel"}, inplace=True)
                 df_tiempos.to_excel(writer, sheet_name="Tiempos", index=False)
 
                 # 5) Costos por panel (agrupado por BASE) — usa cantidades_por_base ya existente
                 filas_costos = []
-
                 def _mo_total(d):
-                    return (
-                        (d.get("costo_mo_corte_usd", 0.0) or 0.0)
-                        + (d.get("costo_mo_sold_usd", 0.0) or 0.0)
-                        + (d.get("costo_mo_perf_usd", 0.0) or 0.0)
-                    )
+                    return (d.get('costo_mo_corte_usd', 0.0) or 0.0) + \
+                           (d.get('costo_mo_sold_usd', 0.0) or 0.0) + \
+                           (d.get('costo_mo_perf_usd', 0.0) or 0.0)
 
-                for base, cant_total in sorted(
-                    cantidades_por_base.items(), key=lambda x: x[0].lower()
-                ):
+                for base, cant_total in sorted(cantidades_por_base.items(), key=lambda x: x[0].lower()):
                     if cant_total <= 0:
                         continue
                     info = parse_panel_code(base)
@@ -2017,91 +1452,65 @@ def menu_exportacion(
                         continue
 
                     dcost = costos_por_panel.get(base, {})
-                    mp_total = dcost.get("costo_mp_usd", 0.0) or 0.0
+                    mp_total = dcost.get('costo_mp_usd', 0.0) or 0.0
                     mo_total = _mo_total(dcost)
-                    insumos_total = dcost.get("costo_insumos_usd", 0.0) or 0.0
-                    total_base = dcost.get("costo_total_usd", 0.0) or 0.0
+                    insumos_total = dcost.get('costo_insumos_usd', 0.0) or 0.0
+                    total_base = dcost.get('costo_total_usd', 0.0) or 0.0
 
-                    energia_total = (
-                        dcost.get("costo_energia_usd", 0.0) or 0.0
-                    )  # ← NUEVO
+                    energia_total = dcost.get('costo_energia_usd', 0.0) or 0.0  # ← NUEVO
 
                     costo_unit = total_base / cant_total if cant_total else 0.0
                     usd_m2_unit = (costo_unit / area_unit) if area_unit > 0 else 0.0
 
-                    filas_costos.append(
-                        {
-                            "Panel (base)": base,
-                            "Cantidad": cant_total,
-                            "Área panel (m²)": round(area_unit, 3),
-                            "Costo unit (USD)": round(costo_unit, 2),
-                            "USD/m² unit": round(usd_m2_unit, 2),
-                            "MP (USD)": round(mp_total, 2),
-                            "MO (USD)": round(mo_total, 2),
-                            "Insumos (USD)": round(insumos_total, 2),
-                            "Energía (USD)": round(energia_total, 2),  # ← NUEVO
-                            "Total (USD)": round(total_base, 2),
-                        }
-                    )
+                    filas_costos.append({
+                        "Panel (base)": base,
+                        "Cantidad": cant_total,
+                        "Área panel (m²)": round(area_unit, 3),
+                        "Costo unit (USD)": round(costo_unit, 2),
+                        "USD/m² unit": round(usd_m2_unit, 2),
+                        "MP (USD)": round(mp_total, 2),
+                        "MO (USD)": round(mo_total, 2),
+                        "Insumos (USD)": round(insumos_total, 2),
+                        "Energía (USD)": round(energia_total, 2),   # ← NUEVO
+                        "Total (USD)": round(total_base, 2),
+                    })
 
-                pd.DataFrame(filas_costos).to_excel(
-                    writer, sheet_name="Costos", index=False
-                )
+                pd.DataFrame(filas_costos).to_excel(writer, sheet_name="Costos", index=False)
 
                 # 6) Detalle de insumos por pieza
                 filas_insumos = []
                 for panel, ins in detalle_por_pieza.items():
                     for nombre, datos in ins.items():
-                        filas_insumos.append(
-                            {
-                                "Panel": panel,
-                                "Insumo": nombre,
-                                "Cantidad": datos["cantidad"],
-                                "Costo USD": datos["costo_usd"],
-                            }
-                        )
-                pd.DataFrame(filas_insumos).to_excel(
-                    writer, sheet_name="Insumos", index=False
-                )
+                        filas_insumos.append({
+                            "Panel": panel,
+                            "Insumo": nombre,
+                            "Cantidad": datos["cantidad"],
+                            "Costo USD": datos["costo_usd"]
+                        })
+                pd.DataFrame(filas_insumos).to_excel(writer, sheet_name="Insumos", index=False)
 
                 # 7) Áreas (por BASE)
-                pd.DataFrame(filas_area_base).to_excel(
-                    writer, sheet_name="Áreas_BASE", index=False
-                )
+                pd.DataFrame(filas_area_base).to_excel(writer, sheet_name="Áreas_BASE", index=False)
 
                 # 8) Resumen (mismas métricas que 'resumen' ya calculado)
-                df_resumen = pd.DataFrame(
-                    [
-                        {
-                            "Total piezas (despiece)": resumen["total_piezas_despiece"],
-                            "Total paneles (CSV)": resumen["total_paneles"],
-                            "Área total (m²)": round(
-                                resumen["total_area_m2"], 3
-                            ),  # viene de calcular_areas_por_base
-                            "Costo total (USD)": round(resumen["total_costo_usd"], 2),
-                            "Costo promedio (USD/m²)": round(
-                                resumen["costo_promedio_usd_m2"], 2
-                            ),
-                            "Tiempo total (horas)": round(
-                                resumen["total_tiempo_horas"], 2
-                            ),
-                            "Tiempo total (días, 8h)": round(
-                                resumen["total_tiempo_dias"], 2
-                            ),
-                            "Tasa CLP→USD usada": tasa,
-                        }
-                    ]
-                )
+                df_resumen = pd.DataFrame([{
+                    "Total piezas (despiece)": resumen['total_piezas_despiece'],
+                    "Total paneles (CSV)": resumen['total_paneles'],
+                    "Área total (m²)": round(resumen['total_area_m2'], 3),  # viene de calcular_areas_por_base
+                    "Costo total (USD)": round(resumen['total_costo_usd'], 2),
+                    "Costo promedio (USD/m²)": round(resumen['costo_promedio_usd_m2'], 2),
+                    "Tiempo total (horas)": round(resumen['total_tiempo_horas'], 2),
+                    "Tiempo total (días, 8h)": round(resumen['total_tiempo_dias'], 2),
+                    "Tasa CLP→USD usada": tasa,
+                }])
                 df_resumen.to_excel(writer, sheet_name="Resumen", index=False)
 
-            print(
-                "\n📂 Archivo 'reporte_completo.xlsx' generado con todas las pestañas."
-            )
+            print("\n📂 Archivo 'reporte_completo.xlsx' generado con todas las pestañas.")
+
 
         # Validación de opción
         if opcion not in [str(i) for i in range(13)]:
             print("⚠️ Opción no válida, inténtalo de nuevo.")
-
 
 if __name__ == "__main__":
     input_csv = "paneles.csv"
