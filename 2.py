@@ -14,6 +14,7 @@ from backend import (
     DETALLE_COSTOS,
     DETALLE_UNIDADES,
     calcular_detalle_insumos,
+    calcular_areas_por_base,
 )
 
 
@@ -197,6 +198,18 @@ elif opcion == "Detalle de insumos por pieza y total pedido":
 """
     for nombre, tot in total_insumos_pedido.items():
         msg += f"| {nombre} | {tot['cantidad_total']:.3f} | {tot['costo_total_usd']:.2f} |\n"
+
+elif opcion == "Área por panel":
+    filas_area, total_area_pedido = calcular_areas_por_base(CANTIDADES_POR_BASE)
+    msg += """
+| Panel (base) | Cant. | Área panel (m²) | Área total (m²) |
+| - | - | - | - |
+"""
+    for r in filas_area:
+        msg += f"| {r['Panel (base)']} | {r['Cantidad']} | {r['Área panel (m²)']:.3f} | {r['Área total (m²)']:.3f} |\n"
+    msg += f"\n**Área TOTAL del pedido (m²):** {total_area_pedido:.3f}"
+
+
 
 
 
