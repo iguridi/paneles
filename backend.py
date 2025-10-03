@@ -1444,7 +1444,7 @@ def resumen_totales_pedido(
     total_paneles = sum(cantidades_por_base.values())
 
     # 4) Área TOTAL por BASE (una sola vez, usando el agrupado)
-    _, total_area_m2 = calcular_costos_por_panel(cantidades_por_base)
+    _, total_area_m2 = calcular_areas_por_base(cantidades_por_base)
 
     # 5) Costos y tiempos
     total_costo_usd = float(total_general_usd or 0.0)
