@@ -57,3 +57,9 @@ python backend.py
 ```
 
 If all tests pass, there will be no output. If a test fails, an `AssertionError` will be raised with details about the failure.
+
+## Environment
+
+This was tested in a Macbook Air M3
+
+I used Python 3.9.6
