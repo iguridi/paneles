@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from backend import RESULTADO_DESPIECE, DESIRED_ORDER, calcular_materia_prima_por_perfil, calcular_totales_perfiles
+from backend import RESULTADO_DESPIECE, DESIRED_ORDER, calcular_materia_prima_por_perfil, calcular_totales_perfiles, calcular_soldadura_por_panel
 
 
 
@@ -65,6 +65,17 @@ Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
         d_tot = totales.get(p, {"numero_piezas": 0, "total_mm": 0})
         d_mp = materia_prima.get(p, {"num_perfiles": 0, "waste_mm": 0})
         msg += f"{p} | {d_tot['numero_piezas']} | {d_tot['total_mm']} | {d_mp['num_perfiles']} | {d_mp['waste_mm']}\n"
+
+elif opcion == "Soldadura necesaria por panel":
+    soldadura = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
+    msg = """
+### Soldadura necesaria por panel
+
+| Panel | Soldadura (mm) |
+| - | - |
+"""
+    for panel in sorted(soldadura.keys(), key=lambda x: x.lower()):
+        msg += f"| {panel} | {soldadura[panel]} |\n"
 
 res = st.markdown(msg)
 
