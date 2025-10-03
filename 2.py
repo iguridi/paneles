@@ -4,6 +4,7 @@ from backend import RESULTADO_DESPIECE, DESIRED_ORDER, calcular_materia_prima_po
 
 
 
+
 st.file_uploader("paneles.csv")
 
 opcion = st.radio(
@@ -21,14 +22,11 @@ opcion = st.radio(
     ],
 )
 
+msg = f'### {opcion}\n\n'
 
-
-st.markdown(opcion)
 
 if opcion == "Despiece detallado":
-    msg = """
-### Despiece detallado
-
+    msg += """
 Panel | Perfil | Piezas | Largo (mm) | Total (mm) |
 | -| - | - |- |- |
 """
@@ -40,9 +38,7 @@ Panel | Perfil | Piezas | Largo (mm) | Total (mm) |
 elif opcion == "Materia prima necesaria por perfil (incluye totales)":
     totales = calcular_totales_perfiles(RESULTADO_DESPIECE)  # {perfil: {numero_piezas, total_mm}}
     materia_prima = calcular_materia_prima_por_perfil(RESULTADO_DESPIECE, longitud_perfil=5850)
-    msg = """
-### Materia Prima necesaria por perfil (incluye totales) 
-
+    msg += """
 Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
 | -| - | - |- |- |
 """
@@ -68,9 +64,7 @@ Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
 
 elif opcion == "Soldadura necesaria por panel":
     soldadura = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
-    msg = """
-### Soldadura necesaria por panel
-
+    msg += """
 | Panel | Soldadura (mm) |
 | - | - |
 """
@@ -79,9 +73,7 @@ elif opcion == "Soldadura necesaria por panel":
 
 elif opcion == "Tiempos por panel":
     tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
-    msg = """
-### Tiempos por PANEL (min)
-
+    msg += """
 | Panel | Corte | Sold. | Perf. | Total |
 | - | - | - | - | - |
 """
