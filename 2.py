@@ -11,6 +11,9 @@ from backend import (
     COSTOS_POR_PANEL,
     parse_panel_code,
     calcular_area,
+    DETALLE_COSTOS,
+    DETALLE_UNIDADES,
+    calcular_detalle_insumos,
 )
 
 
@@ -172,6 +175,29 @@ elif opcion == "Costos por panel (con USD/m² + resumen)":
 - Costo TOTAL pedido (USD): {total_costo:.2f}
 - Precio medio (USD/m²): {precio_medio:.2f}
 """
+
+elif opcion == "Detalle de insumos por pieza y total pedido":
+    detalle_por_pieza, total_insumos_pedido = calcular_detalle_insumos(
+        DETALLE_COSTOS, DETALLE_UNIDADES
+    )
+    msg += """
+| Panel | Insumo | Cantidad | Costo USD |
+| - | - | - | - |
+"""
+    for panel, insumos in detalle_por_pieza.items():
+        for nombre, datos in insumos.items():
+            cantidad = datos["cantidad"]
+            costo_usd = datos["costo_usd"]
+            msg += f"| {panel} | {nombre} | {cantidad:.3f} | {costo_usd:.2f} |\n"
+
+    msg += """
+### Total insumos TODO PEDIDO
+| Insumo | Cant. Total | Costo Total USD |
+| - | - | - |
+"""
+    for nombre, tot in total_insumos_pedido.items():
+        msg += f"| {nombre} | {tot['cantidad_total']:.3f} | {tot['costo_total_usd']:.2f} |\n"
+
 
 
 res = st.markdown(msg)
