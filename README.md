@@ -1,6 +1,6 @@
 # Panel Manufacturing Calculator
 
-This project provides a set of tools to calculate material requirements, costs, and manufacturing times for panel production. It can be used as a command-line tool or through a web-based interface.
+This project provides a set of tools to calculate material requirements, costs, and manufacturing times for panel production. It can be used as a command-line tool or through a web-based interface currently running in https://paneles2.streamlit.app. 
 
 ## Features
 
