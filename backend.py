@@ -1523,3 +1523,9 @@ SOLDADURA = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
 TIEMPOS_PANEL, TIEMPO_TOTAL_GENERAL = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
 COSTOS_POR_PANEL, TOTAL_GENERAL_USD, DETALLE_COSTOS, DETALLE_UNIDADES = calcular_costos_por_panel(RESULTADO_DESPIECE, TIEMPOS_PANEL, 950)
 
+
+if __name__ == "__main__":
+    def equals(x, y):
+        assert x == y, f"{x} != {y}"
+    # testing to make sure it is doing what it is supposed to do
+    equals(calcular_materia_prima_por_perfil(RESULTADO_DESPIECE, longitud_perfil=5850), {'ALA_MURO': {'num_perfiles': 15, 'waste_mm': 22750}, 'REFUERZOGRANDE': {'num_perfiles': 10, 'waste_mm': 6320}, 'REFUERZOCHICO': {'num_perfiles': 2, 'waste_mm': 4410}, 'BASTIDOR_MURO_50': {'num_perfiles': 3, 'waste_mm': 1550}})
