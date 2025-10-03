@@ -15,6 +15,8 @@ from backend import (
     DETALLE_UNIDADES,
     calcular_detalle_insumos,
     calcular_areas_por_base,
+    resumen_totales_pedido,
+    calcular_costos_por_panel,
 )
 
 
@@ -209,9 +211,29 @@ elif opcion == "Área por panel":
         msg += f"| {r['Panel (base)']} | {r['Cantidad']} | {r['Área panel (m²)']:.3f} | {r['Área total (m²)']:.3f} |\n"
     msg += f"\n**Área TOTAL del pedido (m²):** {total_area_pedido:.3f}"
 
-
-
-
+elif opcion == "Resumen":
+    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
+    costos_por_panel, total_general_usd, _, _ = calcular_costos_por_panel(
+        RESULTADO_DESPIECE, tiempos_panel, 970, True
+    )
+    resumen = resumen_totales_pedido(
+        resultado_despiece=RESULTADO_DESPIECE,
+        tiempos_panel=tiempos_panel,
+        tiempo_total_general=tiempo_total_general,
+        costos_por_panel=costos_por_panel,
+        total_general_usd=total_general_usd,
+        cantidades_por_base=CANTIDADES_POR_BASE,
+    )
+    msg += f"""
+- **Total piezas (despiece):** {resumen['total_piezas_despiece']}
+- **Total paneles (CSV):** {resumen['total_paneles']}
+- **Área total (m²):** {resumen['total_area_m2']:.3f}
+- **Costo total (USD):** {resumen['total_costo_usd']:.2f}
+- **Costo promedio (USD/m²):** {resumen['costo_promedio_usd_m2']:.2f}
+- **Tiempo total (min):** {resumen['total_tiempo_min']:.2f}
+- **Tiempo total (horas):** {resumen['total_tiempo_horas']:.2f}
+- **Tiempo total (días, 8h):** {resumen['total_tiempo_dias']:.2f}
+"""
 
 res = st.markdown(msg)
 

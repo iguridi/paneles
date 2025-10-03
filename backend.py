@@ -1444,7 +1444,9 @@ def calcular_areas_por_base(cantidades_por_base):
     return filas, total_area
 
 
+# TODO get from csv data
 CANTIDADES_POR_BASE = {'WF600X2250': 10, 'SF400X2000': 5}
+# TODO get from csv data
 DF_PEDIDO = pd.DataFrame([{'Panel (base)': 'WF600X2250', 'Cantidad': 10}, {'Panel (base)': 'SF400X2000', 'Cantidad': 5}])
 RESULTADO_DESPIECE = calcular_despiece_desde_agrupado(CANTIDADES_POR_BASE)
 SOLDADURA = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
