@@ -3,38 +3,6 @@ import math
 import re
 import pandas as pd
 
-from collections import defaultdict
-
-
-def cargar_pedido_agrupado(input_csv="paneles.csv"):
-    """
-    Lee el CSV original y devuelve:
-      - cantidades_por_base: dict {BASE: cantidad_total}
-      - df_pedido: DataFrame con columnas ['Panel (base)', 'Cantidad'] (ordenado)
-    Normaliza el código eliminando todo lo que siga al primer '-'.
-    """
-    cantidades_por_base = defaultdict(int)
-    with open(input_csv, mode="r") as f:
-        reader = csv.reader(f)
-        next(reader, None)  # saltar encabezado
-        for row in reader:
-            if not row:
-                continue
-            panel_raw = row[0]
-            raw = row[1] if len(row) > 1 else "0"
-            cant = int(re.sub(r"\D", "", raw)) if re.search(r"\d", raw or "") else 0
-            if cant <= 0:
-                continue
-            base = parse_panel_code(panel_raw)["base"]  # ← quita sufijo después de '-'
-            cantidades_por_base[base] += cant
-
-    df_pedido = pd.DataFrame(
-        [
-            {"Panel (base)": k, "Cantidad": v}
-            for k, v in sorted(cantidades_por_base.items())
-        ]
-    )
-    return dict(cantidades_por_base), df_pedido
 
 
 def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
@@ -1476,76 +1444,8 @@ def calcular_areas_por_base(cantidades_por_base):
     return filas, total_area
 
 
-def resumen_totales_pedido(
-    resultado_despiece,
-    tiempos_panel,
-    tiempo_total_general,
-    costos_por_panel,
-    total_general_usd,
-    input_csv="paneles.csv",
-    cantidades_por_base=None,
-):
-    """
-    Resumen global del pedido ALINEADO con el cálculo por BASE:
-      - total_piezas_despiece
-      - total_paneles
-      - total_area_m2
-      - total_costo_usd
-      - total_tiempo_min / horas / días
-      - costo_promedio_usd_m2
-    """
-    # 1) Total piezas del despiece
-    total_piezas_despiece = sum(it.get("numero_piezas", 0) for it in resultado_despiece)
-
-    # 2) Si no viene el agrupado, lo construimos
-    if cantidades_por_base is None:
-        from collections import defaultdict
-
-        cantidades_por_base = defaultdict(int)
-        with open(input_csv, mode="r") as f:
-            reader = csv.reader(f)
-            next(reader, None)
-            for row in reader:
-                if not row:
-                    continue
-                panel = row[0]
-                raw = row[1] if len(row) > 1 else "0"
-                cant = int(re.sub(r"\D", "", raw)) if re.search(r"\d", raw or "") else 0
-                if cant <= 0:
-                    continue
-                base = parse_panel_code(panel)["base"]
-                cantidades_por_base[base] += cant
-        cantidades_por_base = dict(cantidades_por_base)
-
-    # 3) Totales
-    total_paneles = sum(cantidades_por_base.values())
-
-    # 4) Área TOTAL por BASE (una sola vez, usando el agrupado)
-    _, total_area_m2 = calcular_areas_por_base(cantidades_por_base)
-
-    # 5) Costos y tiempos
-    total_costo_usd = float(total_general_usd or 0.0)
-    total_tiempo_min = float(tiempo_total_general or 0.0)
-    total_tiempo_horas = total_tiempo_min / 60.0 if total_tiempo_min > 0 else 0.0
-    total_tiempo_dias = total_tiempo_horas / 8.0 if total_tiempo_horas > 0 else 0.0
-
-    # 6) Promedio USD/m²
-    costo_promedio_usd_m2 = (
-        (total_costo_usd / total_area_m2) if total_area_m2 > 0 else 0.0
-    )
-
-    return {
-        "total_piezas_despiece": total_piezas_despiece,
-        "total_paneles": total_paneles,
-        "total_area_m2": total_area_m2,
-        "total_costo_usd": total_costo_usd,
-        "total_tiempo_min": total_tiempo_min,
-        "total_tiempo_horas": total_tiempo_horas,
-        "total_tiempo_dias": total_tiempo_dias,
-        "costo_promedio_usd_m2": costo_promedio_usd_m2,
-    }
-
-CANTIDADES_POR_BASE, DF_PEDIDO = cargar_pedido_agrupado()
+CANTIDADES_POR_BASE = {'WF600X2250': 10, 'SF400X2000': 5}
+DF_PEDIDO = pd.DataFrame([{'Panel (base)': 'WF600X2250', 'Cantidad': 10}, {'Panel (base)': 'SF400X2000', 'Cantidad': 5}])
 RESULTADO_DESPIECE = calcular_despiece_desde_agrupado(CANTIDADES_POR_BASE)
 SOLDADURA = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
 TIEMPOS_PANEL, TIEMPO_TOTAL_GENERAL = calcular_tiempos_por_panel(RESULTADO_DESPIECE)

@@ -161,9 +161,7 @@ elif opcion == "Costos por panel (con USD/m² + resumen)":
         energia_total,
         total_base,
     ) in filas:
-        msg += f'''
-| {base} | {cant} | {area_unit:.3f} | {costo_unit:.2f} | {usd_m2_unit:.2f} | {mp_total:.2f} | {mo_total:.2f} | {ins_total:.2f} | {energia_total:.2f} | {total_base:.2f} |
-'''
+        msg += f'| {base} | {cant} | {area_unit:.3f} | {costo_unit:.2f} | {usd_m2_unit:.2f} | {mp_total:.2f} | {mo_total:.2f} | {ins_total:.2f} | {energia_total:.2f} | {total_base:.2f} |'
 
     precio_medio = (total_costo / total_area) if total_area > 0 else 0.0
     msg += f"""
