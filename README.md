@@ -48,6 +48,12 @@ The web interface provides a user-friendly way to perform the same calculations.
 2.  **Upload the `paneles.csv` file:** Use the file uploader in the web interface.
 3.  **Select a report:** Choose the desired report from the radio buttons.
 
-## TODO
+## Testing
 
-- [ ] connect to csv input file
+The `backend.py` file includes a set of inline tests to verify the correctness of the calculations. To run the tests, execute the `backend.py` script directly:
+
+```bash
+python backend.py
+```
+
+If all tests pass, there will be no output. If a test fails, an `AssertionError` will be raised with details about the failure.
