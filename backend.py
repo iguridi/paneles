@@ -1599,21 +1599,120 @@ if __name__ == "__main__":
 
     assert_equals(
         calcular_areas_por_base(CANTIDADES_POR_BASE),
-        ([{'Panel (base)': 'SF400X2000', 'Cantidad': 5, 'Área panel (m²)': 0.8, 'Área total (m²)': 4.0}, {'Panel (base)': 'WF600X2250', 'Cantidad': 10, 'Área panel (m²)': 1.35, 'Área total (m²)': 13.5}], 17.5),
+        (
+            [
+                {
+                    "Panel (base)": "SF400X2000",
+                    "Cantidad": 5,
+                    "Área panel (m²)": 0.8,
+                    "Área total (m²)": 4.0,
+                },
+                {
+                    "Panel (base)": "WF600X2250",
+                    "Cantidad": 10,
+                    "Área panel (m²)": 1.35,
+                    "Área total (m²)": 13.5,
+                },
+            ],
+            17.5,
+        ),
     )
 
     assert_equals(
-        calcular_costos_por_panel(RESULTADO_DESPIECE,  {"WF600X2250": {
+        calcular_costos_por_panel(
+            RESULTADO_DESPIECE,
+            {
+                "WF600X2250": {
                     "tiempo_corte_min": 130.0,
                     "tiempo_soldadura_min": 1819.0,
                     "tiempo_perforacion_min": 0,
                     "tiempo_total_min": 1949.0,
-                }}, 970, True),
-        ({'WF600X2250': {'costo_mp_usd': 1058.07956496, 'costo_mo_corte_usd': 11.293470790378006, 'costo_mo_sold_usd': 206.62214776632302, 'costo_mo_perf_usd': 0.0, 'costo_insumos_usd': 35.543290597343, 'costo_energia_usd': 28.84533333333334, 'costo_total_usd': 1340.3838074473774}, 'SF400X2000': {'costo_mp_usd': 428.383824, 'costo_mo_corte_usd': 0.0, 'costo_mo_sold_usd': 0.0, 'costo_mo_perf_usd': 0.0, 'costo_insumos_usd': 6.960574965700483, 'costo_energia_usd': 0.0, 'costo_total_usd': 435.34439896570046}}, 1775.728206413078, {'WF600X2250': {'gas': 2.0198808695652177, 'soldadura': 10.683593333333334, 'boquillas': 0.50932, 'teflon': 1.3511127777777778, 'tobera': 0.5541886666666668, 'espiral': 0.8161246666666668, 'difusor': 0.29346533333333336, 'discos_lija': 2.3161933333333335, 'discos_corte': 0.1285426666666667, 'esmeril': 0.11286895, 'ojales': 12.978000000000002, 'remaches': 3.7800000000000002, 'energia_usd': 28.84533333333334}, 'SF400X2000': {'gas': 0.7484330434782609, 'soldadura': 3.958626666666667, 'boquillas': 0.18872, 'teflon': 0.5006322222222223, 'tobera': 0.20534533333333338, 'espiral': 0.3024013333333334, 'difusor': 0.10873866666666668, 'discos_lija': 0.8582266666666667, 'discos_corte': 0.04762933333333334, 'esmeril': 0.041821699999999996, 'energia_usd': 0.0}}, {'WF600X2250': {'gas': 0.158, 'soldadura': 0.606, 'boquillas': 0.606, 'teflon': 0.101, 'tobera': 0.121, 'espiral': 0.121, 'difusor': 0.121, 'discos_lija': 1.213, 'discos_corte': 0.121, 'esmeril': 0.003, 'ojales': 14, 'remaches': 28, 'energia_kwh': 144.2267}, 'SF400X2000': {'gas': 0.059, 'soldadura': 0.225, 'boquillas': 0.225, 'teflon': 0.037, 'tobera': 0.045, 'espiral': 0.045, 'difusor': 0.045, 'discos_lija': 0.449, 'discos_corte': 0.045, 'esmeril': 0.001, 'energia_kwh': 0.0}}),
+                }
+            },
+            970,
+            True,
+        ),
+        (
+            {
+                "WF600X2250": {
+                    "costo_mp_usd": 1058.07956496,
+                    "costo_mo_corte_usd": 11.293470790378006,
+                    "costo_mo_sold_usd": 206.62214776632302,
+                    "costo_mo_perf_usd": 0.0,
+                    "costo_insumos_usd": 35.543290597343,
+                    "costo_energia_usd": 28.84533333333334,
+                    "costo_total_usd": 1340.3838074473774,
+                },
+                "SF400X2000": {
+                    "costo_mp_usd": 428.383824,
+                    "costo_mo_corte_usd": 0.0,
+                    "costo_mo_sold_usd": 0.0,
+                    "costo_mo_perf_usd": 0.0,
+                    "costo_insumos_usd": 6.960574965700483,
+                    "costo_energia_usd": 0.0,
+                    "costo_total_usd": 435.34439896570046,
+                },
+            },
+            1775.728206413078,
+            {
+                "WF600X2250": {
+                    "gas": 2.0198808695652177,
+                    "soldadura": 10.683593333333334,
+                    "boquillas": 0.50932,
+                    "teflon": 1.3511127777777778,
+                    "tobera": 0.5541886666666668,
+                    "espiral": 0.8161246666666668,
+                    "difusor": 0.29346533333333336,
+                    "discos_lija": 2.3161933333333335,
+                    "discos_corte": 0.1285426666666667,
+                    "esmeril": 0.11286895,
+                    "ojales": 12.978000000000002,
+                    "remaches": 3.7800000000000002,
+                    "energia_usd": 28.84533333333334,
+                },
+                "SF400X2000": {
+                    "gas": 0.7484330434782609,
+                    "soldadura": 3.958626666666667,
+                    "boquillas": 0.18872,
+                    "teflon": 0.5006322222222223,
+                    "tobera": 0.20534533333333338,
+                    "espiral": 0.3024013333333334,
+                    "difusor": 0.10873866666666668,
+                    "discos_lija": 0.8582266666666667,
+                    "discos_corte": 0.04762933333333334,
+                    "esmeril": 0.041821699999999996,
+                    "energia_usd": 0.0,
+                },
+            },
+            {
+                "WF600X2250": {
+                    "gas": 0.158,
+                    "soldadura": 0.606,
+                    "boquillas": 0.606,
+                    "teflon": 0.101,
+                    "tobera": 0.121,
+                    "espiral": 0.121,
+                    "difusor": 0.121,
+                    "discos_lija": 1.213,
+                    "discos_corte": 0.121,
+                    "esmeril": 0.003,
+                    "ojales": 14,
+                    "remaches": 28,
+                    "energia_kwh": 144.2267,
+                },
+                "SF400X2000": {
+                    "gas": 0.059,
+                    "soldadura": 0.225,
+                    "boquillas": 0.225,
+                    "teflon": 0.037,
+                    "tobera": 0.045,
+                    "espiral": 0.045,
+                    "difusor": 0.045,
+                    "discos_lija": 0.449,
+                    "discos_corte": 0.045,
+                    "esmeril": 0.001,
+                    "energia_kwh": 0.0,
+                },
+            },
+        ),
     )
-
-
-
-
-    # resumen_totales_pedido,
-    # calcular_costos_por_panel,
