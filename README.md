@@ -60,6 +60,4 @@ If all tests pass, there will be no output. If a test fails, an `AssertionError`
 
 ## Environment
 
-This was tested in a Macbook Air M3
-
-I used Python 3.9.6
+This was tested on a MacBook Air with an M3 chip using Python 3.9.6.
