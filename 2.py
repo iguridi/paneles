@@ -40,11 +40,13 @@ opcion = st.radio(
     ],
 )
 
-msg = f'### {opcion}\n\n'
+msg = ''
 
 
 if opcion == "Despiece detallado":
     msg += """
+### Despiece detallado
+
 Panel | Perfil | Piezas | Largo (mm) | Total (mm) |
 | -| - | - |- |- |
 """
@@ -57,6 +59,8 @@ elif opcion == "Materia prima necesaria por perfil (incluye totales)":
     totales = calcular_totales_perfiles(RESULTADO_DESPIECE)  # {perfil: {numero_piezas, total_mm}}
     materia_prima = calcular_materia_prima_por_perfil(RESULTADO_DESPIECE, longitud_perfil=5850)
     msg += """
+### Materia prima necesaria por perfil (incluye totales)
+
 Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
 | -| - | - |- |- |
 """
@@ -83,6 +87,8 @@ Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
 elif opcion == "Soldadura necesaria por panel":
     soldadura = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
     msg += """
+### Soldadura necesaria por panel
+
 | Panel | Soldadura (mm) |
 | - | - |
 """
@@ -92,6 +98,8 @@ elif opcion == "Soldadura necesaria por panel":
 elif opcion == "Tiempos por panel":
     tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
     msg += """
+### Tiempos por panel
+
 | Panel | Corte | Sold. | Perf. | Total |
 | - | - | - | - | - |
 """
@@ -101,6 +109,8 @@ elif opcion == "Tiempos por panel":
 
 elif opcion == "Costos por panel (con USD/m² + resumen)":
     msg += '''
+### Costos por panel (con USD/m² + resumen)
+
 | Panel (base) | Cant. | Área panel (m²) | Costo unit (USD) | USD/m² unit | MP (USD) | MO (USD) | Insumos (USD) | Energía (USD) | Total (USD) |
 | - | - | - | - | - | - | - | - | - | - |
 '''
@@ -184,6 +194,8 @@ elif opcion == "Detalle de insumos por pieza y total pedido":
         DETALLE_COSTOS, DETALLE_UNIDADES
     )
     msg += """
+### Detalle de insumos por pieza y total pedido
+
 | Panel | Insumo | Cantidad | Costo USD |
 | - | - | - | - |
 """
@@ -194,7 +206,7 @@ elif opcion == "Detalle de insumos por pieza y total pedido":
             msg += f"| {panel} | {nombre} | {cantidad:.3f} | {costo_usd:.2f} |\n"
 
     msg += """
-### Total insumos TODO PEDIDO
+#### Total insumos TODO PEDIDO
 | Insumo | Cant. Total | Costo Total USD |
 | - | - | - |
 """
@@ -225,6 +237,7 @@ elif opcion == "Resumen":
         cantidades_por_base=CANTIDADES_POR_BASE,
     )
     msg += f"""
+### Resumen
 - **Total piezas (despiece):** {resumen['total_piezas_despiece']}
 - **Total paneles (CSV):** {resumen['total_paneles']}
 - **Área total (m²):** {resumen['total_area_m2']:.3f}
