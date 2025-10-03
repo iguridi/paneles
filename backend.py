@@ -1419,6 +1419,56 @@ def calcular_soldadura_por_panel(despiece):
     return soldadura_por_panel
 
 
+def resumen_totales_pedido(
+    resultado_despiece,
+    tiempos_panel,
+    tiempo_total_general,
+    costos_por_panel,
+    total_general_usd,
+    cantidades_por_base,
+    input_csv="paneles.csv",
+):
+    """
+    Resumen global del pedido ALINEADO con el cálculo por BASE:
+      - total_piezas_despiece
+      - total_paneles
+      - total_area_m2
+      - total_costo_usd
+      - total_tiempo_min / horas / días
+      - costo_promedio_usd_m2
+    """
+    # 1) Total piezas del despiece
+    total_piezas_despiece = sum(it.get("numero_piezas", 0) for it in resultado_despiece)
+
+    # 3) Totales
+    total_paneles = sum(cantidades_por_base.values())
+
+    # 4) Área TOTAL por BASE (una sola vez, usando el agrupado)
+    _, total_area_m2 = calcular_areas_por_base(cantidades_por_base)
+
+    # 5) Costos y tiempos
+    total_costo_usd = float(total_general_usd or 0.0)
+    total_tiempo_min = float(tiempo_total_general or 0.0)
+    total_tiempo_horas = total_tiempo_min / 60.0 if total_tiempo_min > 0 else 0.0
+    total_tiempo_dias = total_tiempo_horas / 8.0 if total_tiempo_horas > 0 else 0.0
+
+    # 6) Promedio USD/m²
+    costo_promedio_usd_m2 = (
+        (total_costo_usd / total_area_m2) if total_area_m2 > 0 else 0.0
+    )
+
+    return {
+        "total_piezas_despiece": total_piezas_despiece,
+        "total_paneles": total_paneles,
+        "total_area_m2": total_area_m2,
+        "total_costo_usd": total_costo_usd,
+        "total_tiempo_min": total_tiempo_min,
+        "total_tiempo_horas": total_tiempo_horas,
+        "total_tiempo_dias": total_tiempo_dias,
+        "costo_promedio_usd_m2": costo_promedio_usd_m2,
+    }
+
+
 # === Función para calcular área ===
 def calcular_area(dimensiones):
     """
