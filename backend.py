@@ -1,9 +1,72 @@
-import csv
+
 import math
 import re
 import pandas as pd
 
+ # Insumos estándar (no eléctricos)
+INSUMOS = {
+        "gas": {"costo": 12.77, "rendimiento": 575, "unidad": "m"},
+        "soldadura": {"costo": 17.62, "rendimiento": 150, "unidad": "m"},
+        "boquillas": {"costo": 0.84, "rendimiento": 150, "unidad": "m"},
+        "teflon": {"costo": 13.37, "rendimiento": 900, "unidad": "m"},
+        "tobera": {"costo": 4.57, "rendimiento": 750, "unidad": "m"},
+        "espiral": {"costo": 6.73, "rendimiento": 750, "unidad": "m"},
+        "difusor": {"costo": 2.42, "rendimiento": 750, "unidad": "m"},
+        "discos_lija": {"costo": 1.91, "rendimiento": 75, "unidad": "m"},
+        "discos_corte": {"costo": 1.06, "rendimiento": 750, "unidad": "m"},
+        "esmeril": {"costo": 37.23, "rendimiento": 30000, "unidad": "m"},
+    }
 
+# --- Parámetros base ---
+COSTO_ALUMINIO_USD_POR_KG = 3.828
+PESO_POR_PERFIL = {
+    "ALA_LOSA": 4.316,
+    "ALA_MURO": 4.480,
+    "BASTIDOR_LOSA_50": 1.064,
+    "BASTIDOR_LOSA_54": 1.129,
+    "BASTIDOR_MURO_50": 1.368,
+    "BASTIDOR_MURO_54": 1.284,
+    "BCPN": 3.754,
+    "BH120": 4.615,
+    "BH150": 5.034,
+    "CLN100": 5.072,
+    "CLN50": 5.023,
+    "CLN70": 5.294,
+    "ICN": 6.838,
+    "OCN": 2.745,
+    "REFUERZOCHICO": 1.200,
+    "REFUERZOGRANDE": 1.274,
+    "TUBO": 1.923,
+}
+MATERIA_PRIMA_POR_MM = {
+    p: (w / 1000.0) * COSTO_ALUMINIO_USD_POR_KG for p, w in PESO_POR_PERFIL.items()
+}
+MANO_OBRA = {
+    "corte": 5056.0 / 60.0,
+    "soldadura": 6611.0 / 60.0,
+    "perforacion": 3889.0 / 60.0,
+}
+# ---               
+
+DESIRED_ORDER = [
+    "ALA_LOSA",
+    "ALA_MURO",
+    "BASTIDOR_LOSA_50",
+    "BASTIDOR_LOSA_54",
+    "BASTIDOR_MURO_50",
+    "BASTIDOR_MURO_54",
+    "BCPN",
+    "BH120",
+    "BH150",
+    "CLN50",
+    "CLN70",
+    "CLN100",
+    "ICN",
+    "OCN",
+    "REFUERZOCHICO",
+    "REFUERZOGRANDE",
+    "TUBO",
+]
 
 def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
     """
@@ -1087,54 +1150,11 @@ def calcular_costos_por_panel(
       3) detalle_costos: dict panel → {insumo/energia_usd: costo_usd, …}
       4) detalle_unidades: dict panel → {insumo/energia_kwh: cantidad, …}
     """
-    # --- Parámetros base ---
-    costo_aluminio_usd_por_kg = 3.828
-    peso_por_perfil = {
-        "ALA_LOSA": 4.316,
-        "ALA_MURO": 4.480,
-        "BASTIDOR_LOSA_50": 1.064,
-        "BASTIDOR_LOSA_54": 1.129,
-        "BASTIDOR_MURO_50": 1.368,
-        "BASTIDOR_MURO_54": 1.284,
-        "BCPN": 3.754,
-        "BH120": 4.615,
-        "BH150": 5.034,
-        "CLN100": 5.072,
-        "CLN50": 5.023,
-        "CLN70": 5.294,
-        "ICN": 6.838,
-        "OCN": 2.745,
-        "REFUERZOCHICO": 1.200,
-        "REFUERZOGRANDE": 1.274,
-        "TUBO": 1.923,
-    }
-    materia_prima_por_mm = {
-        p: (w / 1000.0) * costo_aluminio_usd_por_kg for p, w in peso_por_perfil.items()
-    }
-    mano_obra = {
-        "corte": 5056.0 / 60.0,
-        "soldadura": 6611.0 / 60.0,
-        "perforacion": 3889.0 / 60.0,
-    }
 
     # --- NUEVO: potencias (kW) por proceso; ajusta a tus equipos reales
     # Ejemplo: sierra tronzadora 2.2 kW, soldadura MIG 5.0 kW, taladro/esmeril 1.5 kW
     if potencias_kw is None:
         potencias_kw = {"corte": 5.0, "soldadura": 4.4, "perforacion": 25.0}
-
-    # Insumos estándar (no eléctricos)
-    insumos = {
-        "gas": {"costo": 12.77, "rendimiento": 575, "unidad": "m"},
-        "soldadura": {"costo": 17.62, "rendimiento": 150, "unidad": "m"},
-        "boquillas": {"costo": 0.84, "rendimiento": 150, "unidad": "m"},
-        "teflon": {"costo": 13.37, "rendimiento": 900, "unidad": "m"},
-        "tobera": {"costo": 4.57, "rendimiento": 750, "unidad": "m"},
-        "espiral": {"costo": 6.73, "rendimiento": 750, "unidad": "m"},
-        "difusor": {"costo": 2.42, "rendimiento": 750, "unidad": "m"},
-        "discos_lija": {"costo": 1.91, "rendimiento": 75, "unidad": "m"},
-        "discos_corte": {"costo": 1.06, "rendimiento": 750, "unidad": "m"},
-        "esmeril": {"costo": 37.23, "rendimiento": 30000, "unidad": "m"},
-    }
 
     # --- Agrupación preliminar (versión segura) ---
     materia_prima_por_panel = {}
@@ -1157,7 +1177,7 @@ def calcular_costos_por_panel(
     for panel, perfiles_mm in materia_prima_por_panel.items():
         # Materia prima
         costo_mp = sum(
-            mm * materia_prima_por_mm.get(perfil, 0)
+            mm * MATERIA_PRIMA_POR_MM.get(perfil, 0)
             for perfil, mm in perfiles_mm.items()
         )
 
@@ -1167,9 +1187,9 @@ def calcular_costos_por_panel(
         t_sold_min = t.get("tiempo_soldadura_min", 0.0)
         t_perf_min = t.get("tiempo_perforacion_min", 0.0)
 
-        costo_mo_c = t_corte_min * mano_obra["corte"] / tasa_clp_usd
-        costo_mo_s = t_sold_min * mano_obra["soldadura"] / tasa_clp_usd
-        costo_mo_p = t_perf_min * mano_obra["perforacion"] / tasa_clp_usd
+        costo_mo_c = t_corte_min * MANO_OBRA["corte"] / tasa_clp_usd
+        costo_mo_s = t_sold_min * MANO_OBRA["soldadura"] / tasa_clp_usd
+        costo_mo_p = t_perf_min * MANO_OBRA["perforacion"] / tasa_clp_usd
 
         # Insumos estándar
         soldadura_length = soldadura_mm_por_panel.get(panel, 0)
@@ -1184,7 +1204,7 @@ def calcular_costos_por_panel(
         t_sold = t_sold_min
         cortes = num_cortes
 
-        for nombre, cfg in insumos.items():
+        for nombre, cfg in INSUMOS.items():
             rend = cfg.get("rendimiento", 0) or 0
             unidad = cfg.get("unidad", "m")
 
@@ -1453,22 +1473,3 @@ SOLDADURA = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
 TIEMPOS_PANEL, TIEMPO_TOTAL_GENERAL = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
 COSTOS_POR_PANEL, TOTAL_GENERAL_USD, DETALLE_COSTOS, DETALLE_UNIDADES = calcular_costos_por_panel(RESULTADO_DESPIECE, TIEMPOS_PANEL, 950)
 
-DESIRED_ORDER = [
-    "ALA_LOSA",
-    "ALA_MURO",
-    "BASTIDOR_LOSA_50",
-    "BASTIDOR_LOSA_54",
-    "BASTIDOR_MURO_50",
-    "BASTIDOR_MURO_54",
-    "BCPN",
-    "BH120",
-    "BH150",
-    "CLN50",
-    "CLN70",
-    "CLN100",
-    "ICN",
-    "OCN",
-    "REFUERZOCHICO",
-    "REFUERZOGRANDE",
-    "TUBO",
-]
