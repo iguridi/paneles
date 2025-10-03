@@ -15,6 +15,13 @@ INSUMOS = {
         'esmeril':      {'costo': 37.23, 'rendimiento': 30000, 'unidad': 'm'},
     }
 
+DESIRED_ORDER = [
+    "ALA_LOSA", "ALA_MURO","BASTIDOR_LOSA_50", "BASTIDOR_LOSA_54",
+    "BASTIDOR_MURO_50", "BASTIDOR_MURO_54","BCPN", "BH120", "BH150",
+    "CLN50", "CLN70", "CLN100","ICN", "OCN",
+    "REFUERZOCHICO", "REFUERZOGRANDE","TUBO"
+]
+
 
 st.file_uploader("paneles.csv")
 
@@ -47,21 +54,43 @@ RESULTADO_DESPIECE = [
     },
 ]
 
-generar = st.button("Generar")
 
-msg = '''
+if opcion == 'Despiece detallado':
+    msg = '''
 ## Despiece detallado
 
-Panel | Perfil | Piezas | Largo (mm) | Total (mm)
+Panel | Perfil | Piezas | Largo (mm) | Total (mm) |
 | -| - | - |- |- |
 '''
 
+    for item in RESULTADO_DESPIECE:
+        msg += f"| {item['panel']} | {item['perfil']} | {item['numero_piezas']} | {item['largo_pieza_mm']} | {item['total_mm']} |\n"
 
+    res = st.markdown(msg)
 
-for item in RESULTADO_DESPIECE:
-    msg += f"| {item['panel']:<15} | {item['perfil']:<35} | {item['numero_piezas']:<8} | {item['largo_pieza_mm']:<10} | {item['total_mm']:<10} |\n"
+       # 4) Materia prima por perfil (unificado con totales de perfiles)
+elif opcion == "Materia prima necesaria por perfil (incluye totales)":
+    # totales = calcular_totales_perfiles(resultado_despiece)  # {perfil: {numero_piezas, total_mm}}
+    # materia_prima = calcular_materia_prima_por_perfil(resultado_despiece, longitud_perfil=5850)
+    msg = '''
+## Materia Prima necesaria por perfil (incluye totales) 
 
-res = st.markdown(msg)
+Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
+| -| - | - |- |- |
+'''
+
+    # primero en el orden deseado
+    for perfil in desired_order:
+        d_tot = totales.get(perfil, {"numero_piezas": 0, "total_mm": 0})
+        d_mp  = materia_prima.get(perfil, {"num_perfiles": 0, "waste_mm": 0})
+        msg += f"{perfil} {d_tot['numero_piezas']} {d_tot['total_mm']} {d_mp['num_perfiles']} {d_mp['waste_mm']}\n"
+
+    # luego los que no están en desired_order (orden alfabético)
+    otros = sorted([p for p in set(list(totales.keys()) + list(materia_prima.keys())) if p not in desired_order])
+    for p in otros:
+        d_tot = totales.get(p, {"numero_piezas": 0, "total_mm": 0})
+        d_mp  = materia_prima.get(p, {"num_perfiles": 0, "waste_mm": 0})
+        msg += f"{p} {d_tot['numero_piezas']} {d_tot['total_mm']} {d_mp['num_perfiles']} {d_mp['waste_mm']}\n")
 
 # download = st.download_button("Descargar")
 
