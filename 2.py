@@ -43,7 +43,7 @@ opcion = st.radio(
 msg = ''
 
 
-if opcion == "Despiece detallado":
+if opcion == "Despiece detallado" or opcion == "Todos":
     msg += """
 ### Despiece detallado
 
@@ -55,7 +55,7 @@ Panel | Perfil | Piezas | Largo (mm) | Total (mm) |
         msg += f"| {item['panel']} | {item['perfil']} | {item['numero_piezas']} | {item['largo_pieza_mm']} | {item['total_mm']} |\n"
 
 # 4) Materia prima por perfil (unificado con totales de perfiles)
-elif opcion == "Materia prima necesaria por perfil (incluye totales)":
+if opcion == "Materia prima necesaria por perfil (incluye totales)" or opcion == "Todos":
     totales = calcular_totales_perfiles(RESULTADO_DESPIECE)  # {perfil: {numero_piezas, total_mm}}
     materia_prima = calcular_materia_prima_por_perfil(RESULTADO_DESPIECE, longitud_perfil=5850)
     msg += """
@@ -84,7 +84,7 @@ Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
         d_mp = materia_prima.get(p, {"num_perfiles": 0, "waste_mm": 0})
         msg += f"{p} | {d_tot['numero_piezas']} | {d_tot['total_mm']} | {d_mp['num_perfiles']} | {d_mp['waste_mm']}\n"
 
-elif opcion == "Soldadura necesaria por panel":
+if opcion == "Soldadura necesaria por panel" or opcion == "Todos":
     soldadura = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
     msg += """
 ### Soldadura necesaria por panel
@@ -95,7 +95,7 @@ elif opcion == "Soldadura necesaria por panel":
     for panel in sorted(soldadura.keys(), key=lambda x: x.lower()):
         msg += f"| {panel} | {soldadura[panel]} |\n"
 
-elif opcion == "Tiempos por panel":
+if opcion == "Tiempos por panel" or opcion == "Todos":
     tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
     msg += """
 ### Tiempos por panel
@@ -107,7 +107,7 @@ elif opcion == "Tiempos por panel":
         msg += f"| {panel} | {d['tiempo_corte_min']:.2f} | {d['tiempo_soldadura_min']:.2f} | {d['tiempo_perforacion_min']:.2f} | {d['tiempo_total_min']:.2f} |\n"
     msg += f"\n**Tiempo TOTAL fabricación:** {tiempo_total_general / 60:.2f} horas"
 
-elif opcion == "Costos por panel (con USD/m² + resumen)":
+if opcion == "Costos por panel (con USD/m² + resumen)" or opcion == "Todos":
     msg += '''
 ### Costos por panel (con USD/m² + resumen)
 
@@ -189,7 +189,7 @@ elif opcion == "Costos por panel (con USD/m² + resumen)":
 - Precio medio (USD/m²): {precio_medio:.2f}
 """
 
-elif opcion == "Detalle de insumos por pieza y total pedido":
+if opcion == "Detalle de insumos por pieza y total pedido" or opcion == "Todos":
     detalle_por_pieza, total_insumos_pedido = calcular_detalle_insumos(
         DETALLE_COSTOS, DETALLE_UNIDADES
     )
@@ -213,7 +213,7 @@ elif opcion == "Detalle de insumos por pieza y total pedido":
     for nombre, tot in total_insumos_pedido.items():
         msg += f"| {nombre} | {tot['cantidad_total']:.3f} | {tot['costo_total_usd']:.2f} |\n"
 
-elif opcion == "Área por panel":
+if opcion == "Área por panel" or opcion == "Todos":
     filas_area, total_area_pedido = calcular_areas_por_base(CANTIDADES_POR_BASE)
     msg += """
 | Panel (base) | Cant. | Área panel (m²) | Área total (m²) |
@@ -223,7 +223,7 @@ elif opcion == "Área por panel":
         msg += f"| {r['Panel (base)']} | {r['Cantidad']} | {r['Área panel (m²)']:.3f} | {r['Área total (m²)']:.3f} |\n"
     msg += f"\n**Área TOTAL del pedido (m²):** {total_area_pedido:.3f}"
 
-elif opcion == "Resumen":
+if opcion == "Resumen" or opcion == "Todos":
     tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
     costos_por_panel, total_general_usd, _, _ = calcular_costos_por_panel(
         RESULTADO_DESPIECE, tiempos_panel, 970, True
