@@ -1572,7 +1572,7 @@ def resumen_totales_pedido(
     return {
         "total_piezas_despiece": total_piezas_despiece,
         "total_paneles": total_paneles,
-.       "total_area_m2": total_area_m2,
+        "total_area_m2": total_area_m2,
         "total_costo_usd": total_costo_usd,
         "total_tiempo_min": total_tiempo_min,
         "total_tiempo_horas": total_tiempo_horas,
