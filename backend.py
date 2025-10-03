@@ -1,21 +1,20 @@
-
 import math
 import re
 import pandas as pd
 
- # Insumos estándar (no eléctricos)
+# Insumos estándar (no eléctricos)
 INSUMOS = {
-        "gas": {"costo": 12.77, "rendimiento": 575, "unidad": "m"},
-        "soldadura": {"costo": 17.62, "rendimiento": 150, "unidad": "m"},
-        "boquillas": {"costo": 0.84, "rendimiento": 150, "unidad": "m"},
-        "teflon": {"costo": 13.37, "rendimiento": 900, "unidad": "m"},
-        "tobera": {"costo": 4.57, "rendimiento": 750, "unidad": "m"},
-        "espiral": {"costo": 6.73, "rendimiento": 750, "unidad": "m"},
-        "difusor": {"costo": 2.42, "rendimiento": 750, "unidad": "m"},
-        "discos_lija": {"costo": 1.91, "rendimiento": 75, "unidad": "m"},
-        "discos_corte": {"costo": 1.06, "rendimiento": 750, "unidad": "m"},
-        "esmeril": {"costo": 37.23, "rendimiento": 30000, "unidad": "m"},
-    }
+    "gas": {"costo": 12.77, "rendimiento": 575, "unidad": "m"},
+    "soldadura": {"costo": 17.62, "rendimiento": 150, "unidad": "m"},
+    "boquillas": {"costo": 0.84, "rendimiento": 150, "unidad": "m"},
+    "teflon": {"costo": 13.37, "rendimiento": 900, "unidad": "m"},
+    "tobera": {"costo": 4.57, "rendimiento": 750, "unidad": "m"},
+    "espiral": {"costo": 6.73, "rendimiento": 750, "unidad": "m"},
+    "difusor": {"costo": 2.42, "rendimiento": 750, "unidad": "m"},
+    "discos_lija": {"costo": 1.91, "rendimiento": 75, "unidad": "m"},
+    "discos_corte": {"costo": 1.06, "rendimiento": 750, "unidad": "m"},
+    "esmeril": {"costo": 37.23, "rendimiento": 30000, "unidad": "m"},
+}
 
 # --- Parámetros base ---
 COSTO_ALUMINIO_USD_POR_KG = 3.828
@@ -46,7 +45,7 @@ MANO_OBRA = {
     "soldadura": 6611.0 / 60.0,
     "perforacion": 3889.0 / 60.0,
 }
-# ---               
+# ---
 
 DESIRED_ORDER = [
     "ALA_LOSA",
@@ -67,6 +66,7 @@ DESIRED_ORDER = [
     "REFUERZOGRANDE",
     "TUBO",
 ]
+
 
 def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
     """
@@ -1515,17 +1515,34 @@ def calcular_areas_por_base(cantidades_por_base):
 
 
 # TODO get from csv data
-CANTIDADES_POR_BASE = {'WF600X2250': 10, 'SF400X2000': 5}
+CANTIDADES_POR_BASE = {"WF600X2250": 10, "SF400X2000": 5}
 # TODO get from csv data
-DF_PEDIDO = pd.DataFrame([{'Panel (base)': 'WF600X2250', 'Cantidad': 10}, {'Panel (base)': 'SF400X2000', 'Cantidad': 5}])
+DF_PEDIDO = pd.DataFrame(
+    [
+        {"Panel (base)": "WF600X2250", "Cantidad": 10},
+        {"Panel (base)": "SF400X2000", "Cantidad": 5},
+    ]
+)
 RESULTADO_DESPIECE = calcular_despiece_desde_agrupado(CANTIDADES_POR_BASE)
 SOLDADURA = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
 TIEMPOS_PANEL, TIEMPO_TOTAL_GENERAL = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
-COSTOS_POR_PANEL, TOTAL_GENERAL_USD, DETALLE_COSTOS, DETALLE_UNIDADES = calcular_costos_por_panel(RESULTADO_DESPIECE, TIEMPOS_PANEL, 950)
+COSTOS_POR_PANEL, TOTAL_GENERAL_USD, DETALLE_COSTOS, DETALLE_UNIDADES = (
+    calcular_costos_por_panel(RESULTADO_DESPIECE, TIEMPOS_PANEL, 950)
+)
 
 
 if __name__ == "__main__":
+
     def equals(x, y):
         assert x == y, f"{x} != {y}"
+
     # testing to make sure it is doing what it is supposed to do
-    equals(calcular_materia_prima_por_perfil(RESULTADO_DESPIECE, longitud_perfil=5850), {'ALA_MURO': {'num_perfiles': 15, 'waste_mm': 22750}, 'REFUERZOGRANDE': {'num_perfiles': 10, 'waste_mm': 6320}, 'REFUERZOCHICO': {'num_perfiles': 2, 'waste_mm': 4410}, 'BASTIDOR_MURO_50': {'num_perfiles': 3, 'waste_mm': 1550}})
+    equals(
+        calcular_materia_prima_por_perfil(RESULTADO_DESPIECE, longitud_perfil=5850),
+        {
+            "ALA_MURO": {"num_perfiles": 15, "waste_mm": 22750},
+            "REFUERZOGRANDE": {"num_perfiles": 10, "waste_mm": 6320},
+            "REFUERZOCHICO": {"num_perfiles": 2, "waste_mm": 4410},
+            "BASTIDOR_MURO_50": {"num_perfiles": 3, "waste_mm": 1550},
+        },
+    )

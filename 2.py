@@ -20,9 +20,6 @@ from backend import (
 )
 
 
-
-
-
 st.file_uploader("paneles.csv")
 
 opcion = st.radio(
@@ -40,7 +37,7 @@ opcion = st.radio(
     ],
 )
 
-msg = ''
+msg = ""
 
 
 if opcion == "Despiece detallado" or opcion == "Todos":
@@ -55,9 +52,16 @@ Panel | Perfil | Piezas | Largo (mm) | Total (mm) |
         msg += f"| {item['panel']} | {item['perfil']} | {item['numero_piezas']} | {item['largo_pieza_mm']} | {item['total_mm']} |\n"
 
 # 4) Materia prima por perfil (unificado con totales de perfiles)
-if opcion == "Materia prima necesaria por perfil (incluye totales)" or opcion == "Todos":
-    totales = calcular_totales_perfiles(RESULTADO_DESPIECE)  # {perfil: {numero_piezas, total_mm}}
-    materia_prima = calcular_materia_prima_por_perfil(RESULTADO_DESPIECE, longitud_perfil=5850)
+if (
+    opcion == "Materia prima necesaria por perfil (incluye totales)"
+    or opcion == "Todos"
+):
+    totales = calcular_totales_perfiles(
+        RESULTADO_DESPIECE
+    )  # {perfil: {numero_piezas, total_mm}}
+    materia_prima = calcular_materia_prima_por_perfil(
+        RESULTADO_DESPIECE, longitud_perfil=5850
+    )
     msg += """
 ### Materia prima necesaria por perfil (incluye totales)
 
@@ -108,12 +112,12 @@ if opcion == "Tiempos por panel" or opcion == "Todos":
     msg += f"\n**Tiempo TOTAL fabricación:** {tiempo_total_general / 60:.2f} horas"
 
 if opcion == "Costos por panel (con USD/m² + resumen)" or opcion == "Todos":
-    msg += '''
+    msg += """
 ### Costos por panel (con USD/m² + resumen)
 
 | Panel (base) | Cant. | Área panel (m²) | Costo unit (USD) | USD/m² unit | MP (USD) | MO (USD) | Insumos (USD) | Energía (USD) | Total (USD) |
 | - | - | - | - | - | - | - | - | - | - |
-'''
+"""
     total_area = 0.0
     total_costo = 0.0
     total_unidades = 0
@@ -177,7 +181,7 @@ if opcion == "Costos por panel (con USD/m² + resumen)" or opcion == "Todos":
         energia_total,
         total_base,
     ) in filas:
-        msg += f'| {base} | {cant} | {area_unit:.3f} | {costo_unit:.2f} | {usd_m2_unit:.2f} | {mp_total:.2f} | {mo_total:.2f} | {ins_total:.2f} | {energia_total:.2f} | {total_base:.2f} |'
+        msg += f"| {base} | {cant} | {area_unit:.3f} | {costo_unit:.2f} | {usd_m2_unit:.2f} | {mp_total:.2f} | {mo_total:.2f} | {ins_total:.2f} | {energia_total:.2f} | {total_base:.2f} |"
 
     precio_medio = (total_costo / total_area) if total_area > 0 else 0.0
     msg += f"""
@@ -238,17 +242,16 @@ if opcion == "Resumen" or opcion == "Todos":
     )
     msg += f"""
 ### Resumen
-- **Total piezas (despiece):** {resumen['total_piezas_despiece']}
-- **Total paneles (CSV):** {resumen['total_paneles']}
-- **Área total (m²):** {resumen['total_area_m2']:.3f}
-- **Costo total (USD):** {resumen['total_costo_usd']:.2f}
-- **Costo promedio (USD/m²):** {resumen['costo_promedio_usd_m2']:.2f}
-- **Tiempo total (min):** {resumen['total_tiempo_min']:.2f}
-- **Tiempo total (horas):** {resumen['total_tiempo_horas']:.2f}
-- **Tiempo total (días, 8h):** {resumen['total_tiempo_dias']:.2f}
+- **Total piezas (despiece):** {resumen["total_piezas_despiece"]}
+- **Total paneles (CSV):** {resumen["total_paneles"]}
+- **Área total (m²):** {resumen["total_area_m2"]:.3f}
+- **Costo total (USD):** {resumen["total_costo_usd"]:.2f}
+- **Costo promedio (USD/m²):** {resumen["costo_promedio_usd_m2"]:.2f}
+- **Tiempo total (min):** {resumen["total_tiempo_min"]:.2f}
+- **Tiempo total (horas):** {resumen["total_tiempo_horas"]:.2f}
+- **Tiempo total (días, 8h):** {resumen["total_tiempo_dias"]:.2f}
 """
 
 res = st.markdown(msg)
 
 # download = st.download_button("Descargar")
-
