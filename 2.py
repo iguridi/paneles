@@ -1,6 +1,18 @@
 import streamlit as st
 import pandas as pd
-from backend import RESULTADO_DESPIECE, DESIRED_ORDER, calcular_materia_prima_por_perfil, calcular_totales_perfiles, calcular_soldadura_por_panel, calcular_tiempos_por_panel
+from backend import (
+    RESULTADO_DESPIECE,
+    DESIRED_ORDER,
+    calcular_materia_prima_por_perfil,
+    calcular_totales_perfiles,
+    calcular_soldadura_por_panel,
+    calcular_tiempos_por_panel,
+    CANTIDADES_POR_BASE,
+    COSTOS_POR_PANEL,
+    parse_panel_code,
+    calcular_area,
+)
+
 
 
 
@@ -80,6 +92,89 @@ elif opcion == "Tiempos por panel":
     for panel, d in tiempos_panel.items():
         msg += f"| {panel} | {d['tiempo_corte_min']:.2f} | {d['tiempo_soldadura_min']:.2f} | {d['tiempo_perforacion_min']:.2f} | {d['tiempo_total_min']:.2f} |\n"
     msg += f"\n**Tiempo TOTAL fabricación:** {tiempo_total_general / 60:.2f} horas"
+
+elif opcion == "Costos por panel (con USD/m² + resumen)":
+    msg += '''
+| Panel (base) | Cant. | Área panel (m²) | Costo unit (USD) | USD/m² unit | MP (USD) | MO (USD) | Insumos (USD) | Energía (USD) | Total (USD) |
+| - | - | - | - | - | - | - | - | - | - |
+'''
+    total_area = 0.0
+    total_costo = 0.0
+    total_unidades = 0
+
+    def _mo_total(d):
+        return (
+            d.get("costo_mo_corte_usd", 0.0)
+            + d.get("costo_mo_sold_usd", 0.0)
+            + d.get("costo_mo_perf_usd", 0.0)
+        )
+
+    filas = []
+    for base, cant_total in sorted(
+        CANTIDADES_POR_BASE.items(), key=lambda x: x[0].lower()
+    ):
+        if cant_total <= 0:
+            continue
+        info = parse_panel_code(base)
+        _, _, area_unit = calcular_area(info["nums"])
+        if area_unit <= 0:
+            continue
+
+        dcost = COSTOS_POR_PANEL.get(base, {})
+        total_base = dcost.get("costo_total_usd", 0.0) or 0.0
+        mp_total = dcost.get("costo_mp_usd", 0.0) or 0.0
+        mo_total = _mo_total(dcost)
+        ins_total = dcost.get("costo_insumos_usd", 0.0) or 0.0
+        energia_total = dcost.get("costo_energia_usd", 0.0) or 0.0  # ← NUEVO
+
+        costo_unit = total_base / cant_total
+        usd_m2_unit = costo_unit / area_unit
+
+        total_unidades += cant_total
+        total_area += area_unit * cant_total
+        total_costo += total_base
+
+        filas.append(
+            (
+                base,
+                cant_total,
+                area_unit,
+                costo_unit,
+                usd_m2_unit,
+                mp_total,
+                mo_total,
+                ins_total,
+                energia_total,
+                total_base,
+            )
+        )
+
+    for (
+        base,
+        cant,
+        area_unit,
+        costo_unit,
+        usd_m2_unit,
+        mp_total,
+        mo_total,
+        ins_total,
+        energia_total,
+        total_base,
+    ) in filas:
+        msg += f'''
+| {base} | {cant} | {area_unit:.3f} | {costo_unit:.2f} | {usd_m2_unit:.2f} | {mp_total:.2f} | {mo_total:.2f} | {ins_total:.2f} | {energia_total:.2f} | {total_base:.2f} |
+'''
+
+    precio_medio = (total_costo / total_area) if total_area > 0 else 0.0
+    msg += f"""
+---
+**Resumen del pedido**
+- Unidades totales: {total_unidades}
+- Área total del pedido (m²): {total_area:.3f}
+- Costo TOTAL pedido (USD): {total_costo:.2f}
+- Precio medio (USD/m²): {precio_medio:.2f}
+"""
+
 
 res = st.markdown(msg)
 
