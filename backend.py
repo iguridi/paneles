@@ -1,3 +1,6 @@
+import re
+import math
+
 RESULTADO_DESPIECE = [
     {
         "panel": "hola",
@@ -99,3 +102,142 @@ def calcular_materia_prima_por_perfil(despiece, longitud_perfil=5850):
         waste = sum(bins)
         resultados[perfil] = {"num_perfiles": num_perfiles, "waste_mm": waste}
     return resultados
+
+def parse_panel_code(code):
+    """
+    Normaliza y extrae partes del código de panel.
+    Retorna:
+      - tipo: prefijo alfabético (ej. WF, SF, MF, CL, CLE, CLI, CE, IC, OC, BH, BCP, CP, CS)
+      - base: código sin sufijo después de '-' (ej. WF600X2250-ABC -> WF600X2250)
+      - nums: lista de enteros en orden de aparición
+      - partes: lista de strings separadas por 'X'
+    """
+    base = code.split("-", 1)[0]  # quita sufijos después de "-"
+    m = re.match(r"([A-Za-z_]+)", base)  # soporta letras y guiones bajos
+    tipo = m.group(1) if m else ""
+    nums = list(map(int, re.findall(r"\d+", base)))
+    partes = re.split(r"[xX]", base)
+
+    # --- Normalización de tipos equivalentes ---
+    if tipo in ("ICC", "IC_Chico"):
+        tipo = "IC"
+    elif tipo in ("OCC", "OC_Chico", "OCH"):
+        tipo = "OC"
+
+    return {"tipo": tipo, "base": base, "nums": nums, "partes": partes}
+
+def calcular_soldadura_por_panel(despiece):
+    # Agrupar items por panel
+    paneles = {}
+    for item in despiece:
+        panel_code = item["panel"]
+        paneles.setdefault(panel_code, []).append(item)
+
+    soldadura_por_panel = {}
+
+    for panel, items in paneles.items():
+        soldadura_total = 0
+        ala_muro_contado = (
+            False  # ALA_MURO / ALA_LOSA se cuentan una sola vez (tu regla actual)
+        )
+
+        # Info base del código (tipo, números, etc.)
+        info = parse_panel_code(panel)
+        tipo = info["tipo"]
+        nums = info["nums"]
+
+        # 1) Aportes por perfil de cada ítem
+        for it in items:
+            perfil = it["perfil"]
+            largo = it["largo_pieza_mm"]
+            piezas = it["numero_piezas"]
+
+            if perfil in ("ALA_MURO", "ALA_LOSA"):
+                # regla actual: contar una sola vez por panel
+                if not ala_muro_contado:
+                    soldadura_total += largo
+                    ala_muro_contado = True
+
+            elif perfil in ("BASTIDOR_MURO_50", "BASTIDOR_LOSA_50"):
+                soldadura_total += (largo + 100) * piezas
+
+            elif perfil == "REFUERZOCHICO":
+                soldadura_total += (math.ceil(largo / 120) * 100 + 240) * piezas
+
+            elif perfil == "REFUERZOGRANDE":
+                soldadura_total += (math.ceil(largo / 120) * 100 + 400) * piezas
+
+            elif perfil == "REFUERZO_CL70":
+                soldadura_total += 270 * piezas
+
+            elif perfil in ("REFUERZO_CL100", "REFUERZO_CL50"):
+                soldadura_total += 250 * piezas
+
+            elif perfil == "REFUERZO_IC":
+                soldadura_total += 300 * piezas
+
+            elif perfil == "TUBO":
+                soldadura_total += 157 * piezas
+
+            # Otros perfiles: sin aporte de soldadura
+
+        # 2) Extras por tipo de panel (manteniendo tu lógica original)
+
+        # CLI / CLE: extra fijo
+        if "CLI" in panel or "CLE" in panel:
+            soldadura_total += 270 + 200
+
+        # CS / CP / BCP: usar helper para ALTO/ANCHO y sumar extras
+        if tipo in ("CS", "CP", "BCP"):
+            try:
+                # Para BCP/CP definimos antes ALTO, ANCHO (en ese orden)
+                # Para CS definimos ANCHO, LARGO, pero aquí sólo necesitamos ANCHO y ALTO.
+                # En tu lógica original, ALTO se lee del prefijo (CL/BCP/CP), para CS no está explícito.
+                # Conservamos tu criterio: en BCP/CP, ALTO es nums[0], ANCHO es nums[1].
+                if tipo in ("BCP", "CP"):
+                    ALTO, ANCHO = nums[0], nums[1]
+                    if tipo == "BCP":
+                        soldadura_total += 200  # extra cuando empieza con 'B' (BCP)
+                else:
+                    # CS: en tu cálculo original no se usó ALTO directamente aquí,
+                    # sólo después para condiciones en BCP/CP. Así que no hacemos nada especial.
+                    # Si alguna vez necesitas ALTO para CS, ajusta la regla aquí.
+                    ANCHO = nums[0]  # primera cifra es ANCHO en CS
+                    ALTO = None
+
+                if ALTO is not None:
+                    if ALTO > 150:
+                        soldadura_total += ANCHO * 2
+                    if ALTO < 150:
+                        soldadura_total += ANCHO
+            except Exception:
+                # Si falla el parse, no sumamos extras (mantenemos robustez)
+                pass
+
+        # IC: usar helper para ANCHO/ALTO/LARGO y sumar extras
+        if tipo == "IC":
+            try:
+                ANCHO, ALTO, LARGO = nums[0], nums[1], nums[2]
+                if ANCHO > 150 or ALTO > 150:
+                    soldadura_total += LARGO * 2
+                if ANCHO < 150 or ALTO < 150:
+                    soldadura_total += LARGO
+            except Exception:
+                pass
+
+        # WF: extra fijo
+        if tipo == "WF":
+            soldadura_total += 300
+
+        # CE: si ANCHO == 600, sumar 600
+        if tipo == "CE":
+            try:
+                ANCHO = nums[0]
+                if ANCHO == 600:
+                    soldadura_total += 600
+            except Exception:
+                pass
+
+        soldadura_por_panel[panel] = soldadura_total
+
+    return soldadura_por_panel
