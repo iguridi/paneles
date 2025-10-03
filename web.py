@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from backend import (
     RESULTADO_DESPIECE,
     DESIRED_ORDER,

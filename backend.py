@@ -1531,8 +1531,8 @@ COSTOS_POR_PANEL, TOTAL_GENERAL_USD, DETALLE_COSTOS, DETALLE_UNIDADES = (
 )
 
 
+# testing to make sure it is doing what it is supposed to do
 if __name__ == "__main__":
-    # testing to make sure it is doing what it is supposed to do
     def assert_equals(x, y):
         assert x == y, f"{x} != {y}"
 
