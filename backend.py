@@ -1456,41 +1456,6 @@ def calcular_area(dimensiones):
     return ancho, largo, area
 
 
-# === Función para leer cantidades y calcular áreas ===
-def calcular_areas_por_panel(input_csv="paneles.csv"):
-    panel_counts = {}
-    with open(input_csv, mode="r") as f:
-        reader = csv.reader(f)
-        next(reader, None)  # Saltar encabezado
-        for row in reader:
-            if not row:
-                continue
-            panel, cant = row[0], row[1]
-            cantidad = (
-                int(re.sub(r"\D", "", cant)) if re.search(r"\d", cant or "") else 0
-            )
-            if cantidad == 0:
-                continue
-            panel_counts[panel] = cantidad
-
-    areas = {}
-    for panel, cantidad in panel_counts.items():
-        info = parse_panel_code(panel)
-        base = info["base"]
-        ancho, largo, area = calcular_area(info["nums"])
-        if area <= 0:
-            continue
-        areas[base] = {
-            "ancho_mm": ancho,
-            "largo_mm": largo,
-            "area_m2": area,
-            "cantidad": cantidad,
-            "area_total_m2": area * cantidad,
-        }
-
-    return areas
-
-
 def calcular_areas_por_base(cantidades_por_base):
     filas = []
     total_area = 0.0
