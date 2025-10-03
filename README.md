@@ -19,14 +19,20 @@ The CLI tool `script.py` processes a `paneles.csv` file to generate different re
 **Prerequisites:**
 
 -   Python 3.x
--   Pandas library (`pip install pandas`)
 
 **Usage:**
 
-1.  **Prepare the input file:** Create a `paneles.csv` file in the same directory with the panel types and quantities. See the "Input File Format" section for more details.
+1.  **Prepare the input file:** Get `paneles.csv` file ready
+1. **Prepare environment:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
 2.  **Run the script:**
     ```bash
-    python script.py
+    python3 script.py
     ```
 3.  **Follow the prompts:** The script will ask for the current USD to CLP exchange rate and then present a menu of available reports.
 
@@ -41,6 +47,12 @@ The web interface provides a user-friendly way to perform the same calculations.
 
 **Usage:**
 
+1. **Prepare environment:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 1.  **Run the Streamlit app:**
     ```bash
     streamlit run web.py
@@ -61,3 +73,9 @@ If all tests pass, there will be no output. If a test fails, an `AssertionError`
 ## Environment
 
 This was tested on a MacBook Air with an M3 chip using Python 3.9.6.
+
+
+## TODO
+
+- [ ] Read from uploaded csv file
+- [ ] Download data to file
