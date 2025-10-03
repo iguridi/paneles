@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from backend import RESULTADO_DESPIECE, DESIRED_ORDER, calcular_materia_prima_por_perfil, calcular_totales_perfiles, calcular_soldadura_por_panel
+from backend import RESULTADO_DESPIECE, DESIRED_ORDER, calcular_materia_prima_por_perfil, calcular_totales_perfiles, calcular_soldadura_por_panel, calcular_tiempos_por_panel
 
 
 
@@ -76,6 +76,18 @@ elif opcion == "Soldadura necesaria por panel":
 """
     for panel in sorted(soldadura.keys(), key=lambda x: x.lower()):
         msg += f"| {panel} | {soldadura[panel]} |\n"
+
+elif opcion == "Tiempos por panel":
+    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
+    msg = """
+### Tiempos por PANEL (min)
+
+| Panel | Corte | Sold. | Perf. | Total |
+| - | - | - | - | - |
+"""
+    for panel, d in tiempos_panel.items():
+        msg += f"| {panel} | {d['tiempo_corte_min']:.2f} | {d['tiempo_soldadura_min']:.2f} | {d['tiempo_perforacion_min']:.2f} | {d['tiempo_total_min']:.2f} |\n"
+    msg += f"\n**Tiempo TOTAL fabricación:** {tiempo_total_general / 60:.2f} horas"
 
 res = st.markdown(msg)
 

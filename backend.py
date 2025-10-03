@@ -241,3 +241,47 @@ def calcular_soldadura_por_panel(despiece):
         soldadura_por_panel[panel] = soldadura_total
 
     return soldadura_por_panel
+
+def calcular_tiempos_por_panel(
+    despiece,
+    tiempo_por_corte_min=1.0,
+    velocidad_soldadura_mm_por_min=50.0,
+    tiempos_perforacion_por_tipo=None,
+):
+    if tiempos_perforacion_por_tipo is None:
+        tiempos_perforacion_por_tipo = {}
+
+    cortes_por_panel = {}
+    for item in despiece:
+        panel = item["panel"]
+        cortes_por_panel.setdefault(panel, 0)
+        cortes_por_panel[panel] += item["numero_piezas"]
+
+    soldadura_mm_por_panel = calcular_soldadura_por_panel(despiece)
+
+    tiempos_panel = {}
+    tiempo_total_general = 0.0
+
+    for panel, cortes in cortes_por_panel.items():
+        t_corte = cortes * tiempo_por_corte_min
+        mm_sold = soldadura_mm_por_panel.get(panel, 0)
+        t_sold = (
+            mm_sold / velocidad_soldadura_mm_por_min
+            if velocidad_soldadura_mm_por_min > 0
+            else 0
+        )
+
+        m = re.match(r"([A-Za-z]+)", panel)
+        tipo = m.group(1) if m else panel
+        t_perfor = cortes * tiempos_perforacion_por_tipo.get(tipo, 0)
+        t_total = t_corte + t_sold + t_perfor
+
+        tiempos_panel[panel] = {
+            "tiempo_corte_min": t_corte,
+            "tiempo_soldadura_min": t_sold,
+            "tiempo_perforacion_min": t_perfor,
+            "tiempo_total_min": t_total,
+        }
+        tiempo_total_general += t_total
+
+    return tiempos_panel, tiempo_total_general
