@@ -42,8 +42,8 @@ The web interface provides a user-friendly way to perform the same calculations.
 
 **Prerequisites:**
 
--   Python 3.x
--   Streamlit and Pandas libraries (`pip install streamlit pandas`)
+- Python 3.x
+- Libraries `pip install -r requirements.txt`
 
 **Usage:**
 
