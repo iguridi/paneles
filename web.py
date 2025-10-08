@@ -13,7 +13,6 @@ from backend import (
     calcular_detalle_insumos,
     calcular_areas_por_base,
     resumen_totales_pedido,
-    calcular_costos_por_panel,
 )
 
 
@@ -28,9 +27,11 @@ cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
 resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
 
 costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = menu_exportacion(resultado_despiece, dolar)
+tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(resultado_despiece)
 
 
-if False:
+
+if False: # hidden cause it is too big
     # Mostrar la “tabla dinámica”
     msg = """
     ### Pedido agrupado por BASE
@@ -123,7 +124,6 @@ if opcion == "Soldadura necesaria por panel" or opcion == "Todos":
         msg += f"| {panel} | {soldadura[panel]} |\n"
 
 if opcion == "Tiempos por panel" or opcion == "Todos":
-    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(resultado_despiece)
     msg += """
 ### Tiempos por panel
 
@@ -251,10 +251,6 @@ if opcion == "Área por panel" or opcion == "Todos":
     msg += f"\n**Área TOTAL del pedido (m²):** {total_area_pedido:.3f}"
 
 if opcion == "Resumen" or opcion == "Todos":
-    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(resultado_despiece)
-    costos_por_panel, total_general_usd, _, _ = calcular_costos_por_panel(
-        resultado_despiece, tiempos_panel, 970, True
-    )
     resumen = resumen_totales_pedido(
         resultado_despiece=resultado_despiece,
         tiempos_panel=tiempos_panel,
