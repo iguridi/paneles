@@ -62,10 +62,8 @@ pip install -r requirements.txt
 
 ## Testing
 
-The `backend.py` file includes a set of inline tests to verify the correctness of the calculations. To run the tests, execute the `backend.py` script directly:
-
 ```bash
-python backend.py
+python tests.py
 ```
 
 If all tests pass, there will be no output. If a test fails, an `AssertionError` will be raised with details about the failure.
