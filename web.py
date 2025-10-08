@@ -23,6 +23,9 @@ csv_file = st.file_uploader("paneles.csv", type="csv", )
 if not csv_file:
     st.stop()
 
+
+dolar = st.number_input("Valor del dólar CLP→USD", min_value=0, value=970)
+
 cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
 resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
 
