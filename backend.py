@@ -1,5 +1,7 @@
 from collections import defaultdict
 import csv
+import streamlit as st
+
 from io import StringIO
 import math
 import re
@@ -73,6 +75,7 @@ DESIRED_ORDER = [
 
 ## File stuff
 
+
 def cargar_pedido_agrupado(csv_file):
     """
     Lee el CSV original y devuelve:
@@ -131,7 +134,7 @@ def menu_exportacion(
     costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = (
         calcular_costos_por_panel(resultado_despiece, tiempos_panel, tasa, True)
     )
-    
+
     return costos_por_panel, total_general_usd, detalle_costos, detalle_unidades
 
 ###
