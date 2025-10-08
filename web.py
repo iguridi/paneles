@@ -24,22 +24,19 @@ if not csv_file:
     st.stop()
 
 cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
-# Mostrar la “tabla dinámica”
-# print("\n=== Pedido agrupado por BASE ===")
-# print(f"{'Panel (base)':<20}{'Cantidad':>10}")
-# for _, row in df_pedido.iterrows():
-#     print(f"{row['Panel (base)']:<20}{int(row['Cantidad']):>10}")
 
-msg = """
-### Pedido agrupado por BASE
+if False:
+    # Mostrar la “tabla dinámica”
+    msg = """
+    ### Pedido agrupado por BASE
 
-| Panel (base) | Cantidad |
-| - | - |
-"""
+    | Panel (base) | Cantidad |
+    | - | - |
+    """
 
-for _, row in df_pedido.iterrows():
-    msg += f"| {row['Panel (base)']} | {int(row['Cantidad'])} | \n"
-st.markdown(msg)
+    for _, row in df_pedido.iterrows():
+        msg += f"| {row['Panel (base)']} | {int(row['Cantidad'])} | \n"
+    st.markdown(msg)
 
 
 

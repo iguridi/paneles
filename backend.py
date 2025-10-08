@@ -81,7 +81,7 @@ def cargar_pedido_agrupado(csv_file):
     Normaliza el código eliminando todo lo que siga al primer '-'.
     """
     cantidades_por_base = defaultdict(int)
-    
+
     reader = csv.reader(StringIO(csv_file.getvalue().decode("utf-8")))
     next(reader, None)  # saltar encabezado
     for row in reader:
@@ -1554,7 +1554,7 @@ def calcular_areas_por_base(cantidades_por_base):
 # TODO get from csv data
 TEST_CANTIDADES_POR_BASE = {"WF600X2250": 10, "SF400X2000": 5}
 # TODO get from csv data
-DF_PEDIDO = pd.DataFrame(
+TEST_DF_PEDIDO = pd.DataFrame(
     [
         {"Panel (base)": "WF600X2250", "Cantidad": 10},
         {"Panel (base)": "SF400X2000", "Cantidad": 5},
