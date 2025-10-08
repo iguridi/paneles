@@ -6,8 +6,8 @@ from backend import (
     calcular_totales_perfiles,
     calcular_soldadura_por_panel,
     calcular_tiempos_por_panel,
-    CANTIDADES_POR_BASE,
     COSTOS_POR_PANEL,
+    cargar_pedido_agrupado,
     parse_panel_code,
     calcular_area,
     DETALLE_COSTOS,
@@ -19,7 +19,29 @@ from backend import (
 )
 
 
-st.file_uploader("paneles.csv")
+csv_file = st.file_uploader("paneles.csv", type="csv", )
+if not csv_file:
+    st.stop()
+
+cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
+# Mostrar la “tabla dinámica”
+# print("\n=== Pedido agrupado por BASE ===")
+# print(f"{'Panel (base)':<20}{'Cantidad':>10}")
+# for _, row in df_pedido.iterrows():
+#     print(f"{row['Panel (base)']:<20}{int(row['Cantidad']):>10}")
+
+msg = """
+### Pedido agrupado por BASE
+
+| Panel (base) | Cantidad |
+| - | - |
+"""
+
+for _, row in df_pedido.iterrows():
+    msg += f"| {row['Panel (base)']} | {int(row['Cantidad'])} | \n"
+st.markdown(msg)
+
+
 
 opcion = st.radio(
     "Seleccione que listado desea detallar",
@@ -130,7 +152,7 @@ if opcion == "Costos por panel (con USD/m² + resumen)" or opcion == "Todos":
 
     filas = []
     for base, cant_total in sorted(
-        CANTIDADES_POR_BASE.items(), key=lambda x: x[0].lower()
+        cantidades_por_base.items(), key=lambda x: x[0].lower()
     ):
         if cant_total <= 0:
             continue
@@ -217,7 +239,7 @@ if opcion == "Detalle de insumos por pieza y total pedido" or opcion == "Todos":
         msg += f"| {nombre} | {tot['cantidad_total']:.3f} | {tot['costo_total_usd']:.2f} |\n"
 
 if opcion == "Área por panel" or opcion == "Todos":
-    filas_area, total_area_pedido = calcular_areas_por_base(CANTIDADES_POR_BASE)
+    filas_area, total_area_pedido = calcular_areas_por_base(cantidades_por_base)
     msg += """
 | Panel (base) | Cant. | Área panel (m²) | Área total (m²) |
 | - | - | - | - |
@@ -237,7 +259,7 @@ if opcion == "Resumen" or opcion == "Todos":
         tiempo_total_general=tiempo_total_general,
         costos_por_panel=costos_por_panel,
         total_general_usd=total_general_usd,
-        cantidades_por_base=CANTIDADES_POR_BASE,
+        cantidades_por_base=cantidades_por_base,
     )
     msg += f"""
 ### Resumen

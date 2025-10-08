@@ -1,3 +1,6 @@
+from collections import defaultdict
+import csv
+from io import StringIO
 import math
 import re
 import pandas as pd
@@ -67,6 +70,40 @@ DESIRED_ORDER = [
     "TUBO",
 ]
 
+
+## File stuff
+
+def cargar_pedido_agrupado(csv_file):
+    """
+    Lee el CSV original y devuelve:
+      - cantidades_por_base: dict {BASE: cantidad_total}
+      - df_pedido: DataFrame con columnas ['Panel (base)', 'Cantidad'] (ordenado)
+    Normaliza el código eliminando todo lo que siga al primer '-'.
+    """
+    cantidades_por_base = defaultdict(int)
+    
+    reader = csv.reader(StringIO(csv_file.getvalue().decode("utf-8")))
+    next(reader, None)  # saltar encabezado
+    for row in reader:
+        if not row:
+            continue
+        panel_raw = row[0]
+        raw = row[1] if len(row) > 1 else "0"
+        cant = int(re.sub(r"\D", "", raw)) if re.search(r"\d", raw or "") else 0
+        if cant <= 0:
+            continue
+        base = parse_panel_code(panel_raw)["base"]  # ← quita sufijo después de '-'
+        cantidades_por_base[base] += cant
+
+    df_pedido = pd.DataFrame(
+        [
+            {"Panel (base)": k, "Cantidad": v}
+            for k, v in sorted(cantidades_por_base.items())
+        ]
+    )
+    return dict(cantidades_por_base), df_pedido
+
+###
 
 def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
     """
@@ -1515,7 +1552,7 @@ def calcular_areas_por_base(cantidades_por_base):
 
 
 # TODO get from csv data
-CANTIDADES_POR_BASE = {"WF600X2250": 10, "SF400X2000": 5}
+TEST_CANTIDADES_POR_BASE = {"WF600X2250": 10, "SF400X2000": 5}
 # TODO get from csv data
 DF_PEDIDO = pd.DataFrame(
     [
@@ -1523,7 +1560,7 @@ DF_PEDIDO = pd.DataFrame(
         {"Panel (base)": "SF400X2000", "Cantidad": 5},
     ]
 )
-RESULTADO_DESPIECE = calcular_despiece_desde_agrupado(CANTIDADES_POR_BASE)
+RESULTADO_DESPIECE = calcular_despiece_desde_agrupado(TEST_CANTIDADES_POR_BASE)
 SOLDADURA = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
 TIEMPOS_PANEL, TIEMPO_TOTAL_GENERAL = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
 COSTOS_POR_PANEL, TOTAL_GENERAL_USD, DETALLE_COSTOS, DETALLE_UNIDADES = (
@@ -1583,7 +1620,7 @@ if __name__ == "__main__":
     )
 
     assert_equals(
-        parse_panel_code(list(CANTIDADES_POR_BASE.keys())[0]),
+        parse_panel_code(list(TEST_CANTIDADES_POR_BASE.keys())[0]),
         {
             "tipo": "WF",
             "base": "WF600X2250",
@@ -1598,7 +1635,7 @@ if __name__ == "__main__":
     )
 
     assert_equals(
-        calcular_areas_por_base(CANTIDADES_POR_BASE),
+        calcular_areas_por_base(TEST_CANTIDADES_POR_BASE),
         (
             [
                 {
