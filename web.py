@@ -1,3 +1,5 @@
+import io
+import pandas as pd
 import streamlit as st
 from backend import (
     DESIRED_ORDER,
@@ -7,6 +9,7 @@ from backend import (
     calcular_soldadura_por_panel,
     calcular_tiempos_por_panel,
     cargar_pedido_agrupado,
+    exportar_todo,
     menu_exportacion,
     parse_panel_code,
     calcular_area,
@@ -99,7 +102,7 @@ Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
         d_mp = materia_prima.get(perfil, {"num_perfiles": 0, "waste_mm": 0})
         msg += f"{perfil} | {d_tot['numero_piezas']} | {d_tot['total_mm']} | {d_mp['num_perfiles']} | {d_mp['waste_mm']}\n"
 
-    # luego los que no están en desired_order (orden alfabético)
+    # luego los que no están en DESIRED_ORDER (orden alfabético)
     otros = sorted(
         [
             p
@@ -273,4 +276,16 @@ if opcion == "Resumen" or opcion == "Todos":
 
 res = st.markdown(msg)
 
-# download = st.download_button("Descargar")
+if opcion == "Todos":
+    export_file = exportar_todo(resultado_despiece,
+    cantidades_por_base,
+    df_pedido,
+    costos_por_panel,
+    tiempos_panel,
+    detalle_por_pieza,
+    dolar,
+    resumen,)
+
+    download = st.download_button("Descargar todo", file_name="reporte_completo.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", data=export_file.getvalue())
+
+

@@ -1,5 +1,6 @@
 from collections import defaultdict
 import csv
+import io
 import streamlit as st
 
 from io import StringIO
@@ -74,6 +75,189 @@ DESIRED_ORDER = [
 
 
 ## File stuff
+def exportar_todo(
+    resultado_despiece,
+    cantidades_por_base,
+    df_pedido,
+    costos_por_panel,
+    tiempos_panel,
+    detalle_por_pieza,
+    dolar,
+    resumen,
+):
+    # Reconstruimos estructuras que usamos arriba
+    totales = calcular_totales_perfiles(resultado_despiece)
+    materia_prima = calcular_materia_prima_por_perfil(
+        resultado_despiece, longitud_perfil=5850
+    )
+    soldadura = calcular_soldadura_por_panel(resultado_despiece)
+
+    # Áreas por BASE (misma lógica que opción 9 y resumen)
+    filas_area_base, total_area_base = calcular_areas_por_base(
+        cantidades_por_base
+    )
+
+    export_file = io.BytesIO
+    with pd.ExcelWriter(export_file, engine="openpyxl") as writer:
+        # 0) Pedido agrupado
+        df_pedido.to_excel(writer, sheet_name="Pedido_agrupado", index=False)
+
+        # 1) Despiece detallado
+        pd.DataFrame(resultado_despiece).to_excel(
+            writer, sheet_name="Despiece", index=False
+        )
+
+        # 2) Materia prima (unificada con totales)
+        filas_mp = []
+        # primero DESIRED_ORDER
+        for perfil in DESIRED_ORDER:
+            t = totales.get(perfil, {"numero_piezas": 0, "total_mm": 0})
+            m = materia_prima.get(perfil, {"num_perfiles": 0, "waste_mm": 0})
+            filas_mp.append(
+                {
+                    "Perfil": perfil,
+                    "Piezas totales": t["numero_piezas"],
+                    "Total(mm)": t["total_mm"],
+                    "Perfiles necesarios (5850mm)": m["num_perfiles"],
+                    "Waste (mm)": m["waste_mm"],
+                }
+            )
+        # luego otros perfiles
+        otros = sorted(
+            [
+                p
+                for p in set(list(totales.keys()) + list(materia_prima.keys()))
+                if p not in DESIRED_ORDER
+            ]
+        )
+        for p in otros:
+            t = totales.get(p, {"numero_piezas": 0, "total_mm": 0})
+            m = materia_prima.get(p, {"num_perfiles": 0, "waste_mm": 0})
+            filas_mp.append(
+                {
+                    "Perfil": p,
+                    "Piezas totales": t["numero_piezas"],
+                    "Total(mm)": t["total_mm"],
+                    "Perfiles necesarios (5850mm)": m["num_perfiles"],
+                    "Waste (mm)": m["waste_mm"],
+                }
+            )
+        pd.DataFrame(filas_mp).to_excel(
+            writer, sheet_name="Materia prima", index=False
+        )
+
+        # 3) Soldadura
+        pd.DataFrame(
+            [{"Panel": k, "Soldadura(mm)": v} for k, v in soldadura.items()]
+        ).to_excel(writer, sheet_name="Soldadura", index=False)
+
+        # 4) Tiempos por panel
+        df_tiempos = pd.DataFrame.from_dict(
+            tiempos_panel, orient="index"
+        ).reset_index()
+        df_tiempos.rename(columns={"index": "Panel"}, inplace=True)
+        df_tiempos.to_excel(writer, sheet_name="Tiempos", index=False)
+
+        # 5) Costos por panel (agrupado por BASE) — usa cantidades_por_base ya existente
+        filas_costos = []
+
+        def _mo_total(d):
+            return (
+                (d.get("costo_mo_corte_usd", 0.0) or 0.0)
+                + (d.get("costo_mo_sold_usd", 0.0) or 0.0)
+                + (d.get("costo_mo_perf_usd", 0.0) or 0.0)
+            )
+
+        for base, cant_total in sorted(
+            cantidades_por_base.items(), key=lambda x: x[0].lower()
+        ):
+            if cant_total <= 0:
+                continue
+            info = parse_panel_code(base)
+            _, _, area_unit = calcular_area(info["nums"])
+            if area_unit <= 0:
+                continue
+
+            dcost = costos_por_panel.get(base, {})
+            mp_total = dcost.get("costo_mp_usd", 0.0) or 0.0
+            mo_total = _mo_total(dcost)
+            insumos_total = dcost.get("costo_insumos_usd", 0.0) or 0.0
+            total_base = dcost.get("costo_total_usd", 0.0) or 0.0
+
+            energia_total = (
+                dcost.get("costo_energia_usd", 0.0) or 0.0
+            )  # ← NUEVO
+
+            costo_unit = total_base / cant_total if cant_total else 0.0
+            usd_m2_unit = (costo_unit / area_unit) if area_unit > 0 else 0.0
+
+            filas_costos.append(
+                {
+                    "Panel (base)": base,
+                    "Cantidad": cant_total,
+                    "Área panel (m²)": round(area_unit, 3),
+                    "Costo unit (USD)": round(costo_unit, 2),
+                    "USD/m² unit": round(usd_m2_unit, 2),
+                    "MP (USD)": round(mp_total, 2),
+                    "MO (USD)": round(mo_total, 2),
+                    "Insumos (USD)": round(insumos_total, 2),
+                    "Energía (USD)": round(energia_total, 2),  # ← NUEVO
+                    "Total (USD)": round(total_base, 2),
+                }
+            )
+
+        pd.DataFrame(filas_costos).to_excel(
+            writer, sheet_name="Costos", index=False
+        )
+
+        # 6) Detalle de insumos por pieza
+        filas_insumos = []
+        for panel, ins in detalle_por_pieza.items():
+            for nombre, datos in ins.items():
+                filas_insumos.append(
+                    {
+                        "Panel": panel,
+                        "Insumo": nombre,
+                        "Cantidad": datos["cantidad"],
+                        "Costo USD": datos["costo_usd"],
+                    }
+                )
+        pd.DataFrame(filas_insumos).to_excel(
+            writer, sheet_name="Insumos", index=False
+        )
+
+        # 7) Áreas (por BASE)
+        pd.DataFrame(filas_area_base).to_excel(
+            writer, sheet_name="Áreas_BASE", index=False
+        )
+
+        # 8) Resumen (mismas métricas que 'resumen' ya calculado)
+        df_resumen = pd.DataFrame(
+            [
+                {
+                    "Total piezas (despiece)": resumen["total_piezas_despiece"],
+                    "Total paneles (CSV)": resumen["total_paneles"],
+                    "Área total (m²)": round(
+                        resumen["total_area_m2"], 3
+                    ),  # viene de calcular_areas_por_base
+                    "Costo total (USD)": round(resumen["total_costo_usd"], 2),
+                    "Costo promedio (USD/m²)": round(
+                        resumen["costo_promedio_usd_m2"], 2
+                    ),
+                    "Tiempo total (horas)": round(
+                        resumen["total_tiempo_horas"], 2
+                    ),
+                    "Tiempo total (días, 8h)": round(
+                        resumen["total_tiempo_dias"], 2
+                    ),
+                    "Tasa CLP→USD usada": dolar,
+                }
+            ]
+        )
+        df_resumen.to_excel(writer, sheet_name="Resumen", index=False)
+
+    return export_file
+
 
 
 def cargar_pedido_agrupado(csv_file):
@@ -1089,6 +1273,7 @@ def parse_panel_code(code):
     return {"tipo": tipo, "base": base, "nums": nums, "partes": partes}
 
 
+@st.cache_data
 def calcular_totales_perfiles(despiece):
     """
     Agrupa el despiece por perfil y suma el total de piezas y milímetros.
@@ -1104,6 +1289,7 @@ def calcular_totales_perfiles(despiece):
     return totales
 
 
+@st.cache_data
 def calcular_materia_prima_por_perfil(despiece, longitud_perfil=5850):
     """
     Para cada perfil del despiece, calcula cuántos perfiles de materia prima
@@ -1373,6 +1559,7 @@ def calcular_detalle_insumos(detalle_costos, detalle_unidades):
     return detalle_por_pieza, total_pedido
 
 
+@st.cache_data
 def calcular_soldadura_por_panel(despiece):
     # Agrupar items por panel
     paneles = {}
@@ -1564,7 +1751,7 @@ def calcular_area(dimensiones):
     area = ancho * largo / 1_000_000
     return ancho, largo, area
 
-
+@st.cache_data
 def calcular_areas_por_base(cantidades_por_base):
     filas = []
     total_area = 0.0
