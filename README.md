@@ -27,6 +27,7 @@ The CLI tool `script.py` processes a `paneles.csv` file to generate different re
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install streamlit
 pip install -r requirements.txt
 ```
 
