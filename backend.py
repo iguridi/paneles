@@ -103,6 +103,7 @@ def cargar_pedido_agrupado(csv_file):
     )
     return dict(cantidades_por_base), df_pedido
 
+
 ###
 
 def _agregar_despiece_de_panel(panel_base, cantidad, despiece):

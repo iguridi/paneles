@@ -1,7 +1,7 @@
 import streamlit as st
 from backend import (
-    RESULTADO_DESPIECE,
     DESIRED_ORDER,
+    calcular_despiece_desde_agrupado,
     calcular_materia_prima_por_perfil,
     calcular_totales_perfiles,
     calcular_soldadura_por_panel,
@@ -24,6 +24,8 @@ if not csv_file:
     st.stop()
 
 cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
+resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
+
 
 if False:
     # Mostrar la “tabla dinámica”
@@ -66,7 +68,7 @@ Panel | Perfil | Piezas | Largo (mm) | Total (mm) |
 | -| - | - |- |- |
 """
 
-    for item in RESULTADO_DESPIECE:
+    for item in resultado_despiece:
         msg += f"| {item['panel']} | {item['perfil']} | {item['numero_piezas']} | {item['largo_pieza_mm']} | {item['total_mm']} |\n"
 
 # 4) Materia prima por perfil (unificado con totales de perfiles)
@@ -75,10 +77,10 @@ if (
     or opcion == "Todos"
 ):
     totales = calcular_totales_perfiles(
-        RESULTADO_DESPIECE
+        resultado_despiece
     )  # {perfil: {numero_piezas, total_mm}}
     materia_prima = calcular_materia_prima_por_perfil(
-        RESULTADO_DESPIECE, longitud_perfil=5850
+        resultado_despiece, longitud_perfil=5850
     )
     msg += """
 ### Materia prima necesaria por perfil (incluye totales)
@@ -107,7 +109,7 @@ Perfil | Piezas totales | Total (mm) | Perfiles necesarios | Waste (mm) |
         msg += f"{p} | {d_tot['numero_piezas']} | {d_tot['total_mm']} | {d_mp['num_perfiles']} | {d_mp['waste_mm']}\n"
 
 if opcion == "Soldadura necesaria por panel" or opcion == "Todos":
-    soldadura = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
+    soldadura = calcular_soldadura_por_panel(resultado_despiece)
     msg += """
 ### Soldadura necesaria por panel
 
@@ -118,7 +120,7 @@ if opcion == "Soldadura necesaria por panel" or opcion == "Todos":
         msg += f"| {panel} | {soldadura[panel]} |\n"
 
 if opcion == "Tiempos por panel" or opcion == "Todos":
-    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
+    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(resultado_despiece)
     msg += """
 ### Tiempos por panel
 
@@ -246,12 +248,12 @@ if opcion == "Área por panel" or opcion == "Todos":
     msg += f"\n**Área TOTAL del pedido (m²):** {total_area_pedido:.3f}"
 
 if opcion == "Resumen" or opcion == "Todos":
-    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
+    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(resultado_despiece)
     costos_por_panel, total_general_usd, _, _ = calcular_costos_por_panel(
-        RESULTADO_DESPIECE, tiempos_panel, 970, True
+        resultado_despiece, tiempos_panel, 970, True
     )
     resumen = resumen_totales_pedido(
-        resultado_despiece=RESULTADO_DESPIECE,
+        resultado_despiece=resultado_despiece,
         tiempos_panel=tiempos_panel,
         tiempo_total_general=tiempo_total_general,
         costos_por_panel=costos_por_panel,
