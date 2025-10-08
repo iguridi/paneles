@@ -1,5 +1,3 @@
-import io
-import pandas as pd
 import streamlit as st
 from backend import (
     DESIRED_ORDER,
@@ -27,15 +25,16 @@ csv_file = st.file_uploader(
 dolar = st.number_input("Valor del dólar CLP→USD", min_value=0, value=970)
 if csv_file:
     cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
-    resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
-
-    costos_por_panel, total_general_usd, detalle_costos, detalle_unidades =menu_exportacion(resultado_despiece, dolar)
-elif True: # for dev, I don't want to load a huge csv every time I test something
-    cantidades_por_base, df_pedido = tests.CANTIDADES_POR_BASE, tests.DF_PEDIDO
-    resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
-
-    costos_por_panel, total_general_usd, detalle_costos, detalle_unidades =menu_exportacion(resultado_despiece, dolar)
     
+elif False: # for dev, I don't want to load a huge csv every time I test something
+    cantidades_por_base, df_pedido = tests.CANTIDADES_POR_BASE, tests.DF_PEDIDO
+
+else:
+    st.stop()
+    
+resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
+costos_por_panel, total_general_usd, detalle_costos, detalle_unidades =menu_exportacion(resultado_despiece, dolar)
+
 tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(resultado_despiece)
 detalle_por_pieza, total_insumos_pedido = calcular_detalle_insumos(
     detalle_costos, detalle_unidades
@@ -94,7 +93,7 @@ if opcion == "Todos":
     )
 
     download = st.download_button(
-        "Descargar todo",
+        "Descargar todo en excel",
         file_name="reporte_completo.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         data=export_file.getvalue(),
