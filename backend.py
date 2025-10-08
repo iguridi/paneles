@@ -93,9 +93,7 @@ def exportar_todo(
     soldadura = calcular_soldadura_por_panel(resultado_despiece)
 
     # Áreas por BASE (misma lógica que opción 9 y resumen)
-    filas_area_base, total_area_base = calcular_areas_por_base(
-        cantidades_por_base
-    )
+    filas_area_base, total_area_base = calcular_areas_por_base(cantidades_por_base)
 
     export_file = io.BytesIO
     with pd.ExcelWriter(export_file, engine="openpyxl") as writer:
@@ -142,9 +140,7 @@ def exportar_todo(
                     "Waste (mm)": m["waste_mm"],
                 }
             )
-        pd.DataFrame(filas_mp).to_excel(
-            writer, sheet_name="Materia prima", index=False
-        )
+        pd.DataFrame(filas_mp).to_excel(writer, sheet_name="Materia prima", index=False)
 
         # 3) Soldadura
         pd.DataFrame(
@@ -152,9 +148,7 @@ def exportar_todo(
         ).to_excel(writer, sheet_name="Soldadura", index=False)
 
         # 4) Tiempos por panel
-        df_tiempos = pd.DataFrame.from_dict(
-            tiempos_panel, orient="index"
-        ).reset_index()
+        df_tiempos = pd.DataFrame.from_dict(tiempos_panel, orient="index").reset_index()
         df_tiempos.rename(columns={"index": "Panel"}, inplace=True)
         df_tiempos.to_excel(writer, sheet_name="Tiempos", index=False)
 
@@ -184,9 +178,7 @@ def exportar_todo(
             insumos_total = dcost.get("costo_insumos_usd", 0.0) or 0.0
             total_base = dcost.get("costo_total_usd", 0.0) or 0.0
 
-            energia_total = (
-                dcost.get("costo_energia_usd", 0.0) or 0.0
-            )  # ← NUEVO
+            energia_total = dcost.get("costo_energia_usd", 0.0) or 0.0  # ← NUEVO
 
             costo_unit = total_base / cant_total if cant_total else 0.0
             usd_m2_unit = (costo_unit / area_unit) if area_unit > 0 else 0.0
@@ -206,9 +198,7 @@ def exportar_todo(
                 }
             )
 
-        pd.DataFrame(filas_costos).to_excel(
-            writer, sheet_name="Costos", index=False
-        )
+        pd.DataFrame(filas_costos).to_excel(writer, sheet_name="Costos", index=False)
 
         # 6) Detalle de insumos por pieza
         filas_insumos = []
@@ -222,9 +212,7 @@ def exportar_todo(
                         "Costo USD": datos["costo_usd"],
                     }
                 )
-        pd.DataFrame(filas_insumos).to_excel(
-            writer, sheet_name="Insumos", index=False
-        )
+        pd.DataFrame(filas_insumos).to_excel(writer, sheet_name="Insumos", index=False)
 
         # 7) Áreas (por BASE)
         pd.DataFrame(filas_area_base).to_excel(
@@ -244,12 +232,8 @@ def exportar_todo(
                     "Costo promedio (USD/m²)": round(
                         resumen["costo_promedio_usd_m2"], 2
                     ),
-                    "Tiempo total (horas)": round(
-                        resumen["total_tiempo_horas"], 2
-                    ),
-                    "Tiempo total (días, 8h)": round(
-                        resumen["total_tiempo_dias"], 2
-                    ),
+                    "Tiempo total (horas)": round(resumen["total_tiempo_horas"], 2),
+                    "Tiempo total (días, 8h)": round(resumen["total_tiempo_dias"], 2),
                     "Tasa CLP→USD usada": dolar,
                 }
             ]
@@ -257,7 +241,6 @@ def exportar_todo(
         df_resumen.to_excel(writer, sheet_name="Resumen", index=False)
 
     return export_file
-
 
 
 def cargar_pedido_agrupado(csv_file):
@@ -290,9 +273,8 @@ def cargar_pedido_agrupado(csv_file):
     )
     return dict(cantidades_por_base), df_pedido
 
-def menu_exportacion(
-    resultado_despiece, tasa
-):
+
+def menu_exportacion(resultado_despiece, tasa):
     # Valores por defecto y tiempos predefinidos
     tiempo_por_corte = 1.25
     velocidad_sold = 200.0
@@ -321,7 +303,9 @@ def menu_exportacion(
 
     return costos_por_panel, total_general_usd, detalle_costos, detalle_unidades
 
+
 ###
+
 
 def _agregar_despiece_de_panel(panel_base, cantidad, despiece):
     """
@@ -1751,6 +1735,7 @@ def calcular_area(dimensiones):
     area = ancho * largo / 1_000_000
     return ancho, largo, area
 
+
 @st.cache_data
 def calcular_areas_por_base(cantidades_por_base):
     filas = []
@@ -1770,5 +1755,3 @@ def calcular_areas_por_base(cantidades_por_base):
         )
         total_area += area_total
     return filas, total_area
-
-

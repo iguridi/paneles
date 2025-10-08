@@ -19,22 +19,25 @@ from backend import (
 )
 
 
-csv_file = st.file_uploader("paneles.csv", type="csv", )
+csv_file = st.file_uploader(
+    "paneles.csv",
+    type="csv",
+)
 dolar = st.number_input("Valor del dólar CLP→USD", min_value=0, value=970)
 if not csv_file:
     st.stop()
 
 
-
 cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
 resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
 
-costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = menu_exportacion(resultado_despiece, dolar)
+costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = (
+    menu_exportacion(resultado_despiece, dolar)
+)
 tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(resultado_despiece)
 
 
-
-if False: # hidden cause it is too big
+if False:  # hidden cause it is too big
     # Mostrar la “tabla dinámica”
     msg = """
     ### Pedido agrupado por BASE
@@ -46,7 +49,6 @@ if False: # hidden cause it is too big
     for _, row in df_pedido.iterrows():
         msg += f"| {row['Panel (base)']} | {int(row['Cantidad'])} | \n"
     st.markdown(msg)
-
 
 
 opcion = st.radio(
@@ -277,15 +279,20 @@ if opcion == "Resumen" or opcion == "Todos":
 res = st.markdown(msg)
 
 if opcion == "Todos":
-    export_file = exportar_todo(resultado_despiece,
-    cantidades_por_base,
-    df_pedido,
-    costos_por_panel,
-    tiempos_panel,
-    detalle_por_pieza,
-    dolar,
-    resumen,)
+    export_file = exportar_todo(
+        resultado_despiece,
+        cantidades_por_base,
+        df_pedido,
+        costos_por_panel,
+        tiempos_panel,
+        detalle_por_pieza,
+        dolar,
+        resumen,
+    )
 
-    download = st.download_button("Descargar todo", file_name="reporte_completo.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", data=export_file.getvalue())
-
-
+    download = st.download_button(
+        "Descargar todo",
+        file_name="reporte_completo.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        data=export_file.getvalue(),
+    )
