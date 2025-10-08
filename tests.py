@@ -1,4 +1,3 @@
-# TODO get from csv data
 import pandas as pd
 
 from backend import (
@@ -15,7 +14,6 @@ from backend import (
 
 
 CANTIDADES_POR_BASE = {"WF600X2250": 10, "SF400X2000": 5}
-# TODO get from csv data
 DF_PEDIDO = pd.DataFrame(
     [
         {"Panel (base)": "WF600X2250", "Cantidad": 10},
