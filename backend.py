@@ -95,7 +95,7 @@ def exportar_todo(
     # Áreas por BASE (misma lógica que opción 9 y resumen)
     filas_area_base, total_area_base = calcular_areas_por_base(cantidades_por_base)
 
-    export_file = io.BytesIO
+    export_file = io.BytesIO(b"")
     with pd.ExcelWriter(export_file, engine="openpyxl") as writer:
         # 0) Pedido agrupado
         df_pedido.to_excel(writer, sheet_name="Pedido_agrupado", index=False)
@@ -1660,7 +1660,7 @@ def calcular_soldadura_por_panel(despiece):
 
     return soldadura_por_panel
 
-
+@st.cache_data
 def resumen_totales_pedido(
     resultado_despiece,
     tiempos_panel,

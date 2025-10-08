@@ -17,6 +17,7 @@ from backend import (
     calcular_areas_por_base,
     resumen_totales_pedido,
 )
+import tests
 
 
 csv_file = st.file_uploader(
@@ -24,17 +25,29 @@ csv_file = st.file_uploader(
     type="csv",
 )
 dolar = st.number_input("Valor del dólar CLP→USD", min_value=0, value=970)
-if not csv_file:
-    st.stop()
+if csv_file:
+    cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
+    resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
 
+    costos_por_panel, total_general_usd, detalle_costos, detalle_unidades =menu_exportacion(resultado_despiece, dolar)
+elif True: # for dev, I don't want to load a huge csv every time I test something
+    cantidades_por_base, df_pedido = tests.CANTIDADES_POR_BASE, tests.DF_PEDIDO
+    resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
 
-cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
-resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
-
-costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = (
-    menu_exportacion(resultado_despiece, dolar)
-)
+    costos_por_panel, total_general_usd, detalle_costos, detalle_unidades =menu_exportacion(resultado_despiece, dolar)
+    
 tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(resultado_despiece)
+detalle_por_pieza, total_insumos_pedido = calcular_detalle_insumos(
+    detalle_costos, detalle_unidades
+)
+resumen = resumen_totales_pedido(
+    resultado_despiece=resultado_despiece,
+    tiempos_panel=tiempos_panel,
+    tiempo_total_general=tiempo_total_general,
+    costos_por_panel=costos_por_panel,
+    total_general_usd=total_general_usd,
+    cantidades_por_base=cantidades_por_base,
+)
 
 
 if False:  # hidden cause it is too big
@@ -68,6 +81,24 @@ opcion = st.radio(
 
 msg = ""
 
+if opcion == "Todos":
+    export_file = exportar_todo(
+        resultado_despiece,
+        cantidades_por_base,
+        df_pedido,
+        costos_por_panel,
+        tiempos_panel,
+        detalle_por_pieza,
+        dolar,
+        resumen,
+    )
+
+    download = st.download_button(
+        "Descargar todo",
+        file_name="reporte_completo.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        data=export_file.getvalue(),
+    )
 
 if opcion == "Despiece detallado" or opcion == "Todos":
     msg += """
@@ -222,9 +253,6 @@ if opcion == "Costos por panel (con USD/m² + resumen)" or opcion == "Todos":
 """
 
 if opcion == "Detalle de insumos por pieza y total pedido" or opcion == "Todos":
-    detalle_por_pieza, total_insumos_pedido = calcular_detalle_insumos(
-        detalle_costos, detalle_unidades
-    )
     msg += """
 ### Detalle de insumos por pieza y total pedido
 
@@ -256,14 +284,6 @@ if opcion == "Área por panel" or opcion == "Todos":
     msg += f"\n**Área TOTAL del pedido (m²):** {total_area_pedido:.3f}"
 
 if opcion == "Resumen" or opcion == "Todos":
-    resumen = resumen_totales_pedido(
-        resultado_despiece=resultado_despiece,
-        tiempos_panel=tiempos_panel,
-        tiempo_total_general=tiempo_total_general,
-        costos_por_panel=costos_por_panel,
-        total_general_usd=total_general_usd,
-        cantidades_por_base=cantidades_por_base,
-    )
     msg += f"""
 ### Resumen
 - **Total piezas (despiece):** {resumen["total_piezas_despiece"]}
@@ -278,21 +298,3 @@ if opcion == "Resumen" or opcion == "Todos":
 
 res = st.markdown(msg)
 
-if opcion == "Todos":
-    export_file = exportar_todo(
-        resultado_despiece,
-        cantidades_por_base,
-        df_pedido,
-        costos_por_panel,
-        tiempos_panel,
-        detalle_por_pieza,
-        dolar,
-        resumen,
-    )
-
-    download = st.download_button(
-        "Descargar todo",
-        file_name="reporte_completo.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        data=export_file.getvalue(),
-    )

@@ -20,12 +20,9 @@ DF_PEDIDO = pd.DataFrame(
         {"Panel (base)": "SF400X2000", "Cantidad": 5},
     ]
 )
-RESULTADO_DESPIECE = calcular_despiece_desde_agrupado(CANTIDADES_POR_BASE)
-SOLDADURA = calcular_soldadura_por_panel(RESULTADO_DESPIECE)
-TIEMPOS_PANEL, TIEMPO_TOTAL_GENERAL = calcular_tiempos_por_panel(RESULTADO_DESPIECE)
-COSTOS_POR_PANEL, TOTAL_GENERAL_USD, DETALLE_COSTOS, DETALLE_UNIDADES = (
-    calcular_costos_por_panel(RESULTADO_DESPIECE, TIEMPOS_PANEL, 950)
-)
+resultado_despiece = calcular_despiece_desde_agrupado(CANTIDADES_POR_BASE)
+tiempos_panel, _ = calcular_tiempos_por_panel(resultado_despiece)
+
 
 
 def assert_equals(x, y):
@@ -33,7 +30,7 @@ def assert_equals(x, y):
 
 
 assert_equals(
-    calcular_materia_prima_por_perfil(RESULTADO_DESPIECE, longitud_perfil=5850),
+    calcular_materia_prima_por_perfil(resultado_despiece, longitud_perfil=5850),
     {
         "ALA_MURO": {"num_perfiles": 15, "waste_mm": 22750},
         "REFUERZOGRANDE": {"num_perfiles": 10, "waste_mm": 6320},
@@ -43,7 +40,7 @@ assert_equals(
 )
 
 assert_equals(
-    calcular_totales_perfiles(RESULTADO_DESPIECE),
+    calcular_totales_perfiles(resultado_despiece),
     {
         "ALA_MURO": {"numero_piezas": 30, "total_mm": 65000},
         "REFUERZOGRANDE": {"numero_piezas": 110, "total_mm": 52180},
@@ -53,12 +50,12 @@ assert_equals(
 )
 
 assert_equals(
-    calcular_soldadura_por_panel(RESULTADO_DESPIECE),
+    calcular_soldadura_por_panel(resultado_despiece),
     {"WF600X2250": 90950, "SF400X2000": 33700},
 )
 
 assert_equals(
-    calcular_tiempos_por_panel(RESULTADO_DESPIECE),
+    calcular_tiempos_por_panel(resultado_despiece),
     (
         {
             "WF600X2250": {
@@ -116,7 +113,7 @@ assert_equals(
 
 assert_equals(
     calcular_costos_por_panel(
-        RESULTADO_DESPIECE,
+        resultado_despiece,
         {
             "WF600X2250": {
                 "tiempo_corte_min": 130.0,
