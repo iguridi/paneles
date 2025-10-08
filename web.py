@@ -6,12 +6,10 @@ from backend import (
     calcular_totales_perfiles,
     calcular_soldadura_por_panel,
     calcular_tiempos_por_panel,
-    COSTOS_POR_PANEL,
     cargar_pedido_agrupado,
+    menu_exportacion,
     parse_panel_code,
     calcular_area,
-    DETALLE_COSTOS,
-    DETALLE_UNIDADES,
     calcular_detalle_insumos,
     calcular_areas_por_base,
     resumen_totales_pedido,
@@ -20,14 +18,16 @@ from backend import (
 
 
 csv_file = st.file_uploader("paneles.csv", type="csv", )
+dolar = st.number_input("Valor del dólar CLP→USD", min_value=0, value=970)
 if not csv_file:
     st.stop()
 
 
-dolar = st.number_input("Valor del dólar CLP→USD", min_value=0, value=970)
 
 cantidades_por_base, df_pedido = cargar_pedido_agrupado(csv_file)
 resultado_despiece = calcular_despiece_desde_agrupado(cantidades_por_base)
+
+costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = menu_exportacion(resultado_despiece, dolar)
 
 
 if False:
@@ -163,7 +163,7 @@ if opcion == "Costos por panel (con USD/m² + resumen)" or opcion == "Todos":
         if area_unit <= 0:
             continue
 
-        dcost = COSTOS_POR_PANEL.get(base, {})
+        dcost = costos_por_panel.get(base, {})
         total_base = dcost.get("costo_total_usd", 0.0) or 0.0
         mp_total = dcost.get("costo_mp_usd", 0.0) or 0.0
         mo_total = _mo_total(dcost)
@@ -218,7 +218,7 @@ if opcion == "Costos por panel (con USD/m² + resumen)" or opcion == "Todos":
 
 if opcion == "Detalle de insumos por pieza y total pedido" or opcion == "Todos":
     detalle_por_pieza, total_insumos_pedido = calcular_detalle_insumos(
-        DETALLE_COSTOS, DETALLE_UNIDADES
+        detalle_costos, detalle_unidades
     )
     msg += """
 ### Detalle de insumos por pieza y total pedido

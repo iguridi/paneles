@@ -103,6 +103,36 @@ def cargar_pedido_agrupado(csv_file):
     )
     return dict(cantidades_por_base), df_pedido
 
+def menu_exportacion(
+    resultado_despiece, tasa
+):
+    # Valores por defecto y tiempos predefinidos
+    tiempo_por_corte = 1.25
+    velocidad_sold = 200.0
+    entrada = (
+        "WF:2,SF:2,MF:2,CL:0.2,CLI:1.5,CLE:1.5,IC:4,OC:1,BH:5,BCP:1,CP:0.9,CE:0.6,CS:1"
+    )
+    tiempos_perforacion_por_tipo = {}
+    for parte in entrada.split(","):
+        tipo, val = parte.split(":", 1)
+        try:
+            tiempos_perforacion_por_tipo[tipo] = float(val)
+        except ValueError:
+            tiempos_perforacion_por_tipo[tipo] = 0.0
+
+    # Pre-cálculos (una sola vez)
+    tiempos_panel, tiempo_total_general = calcular_tiempos_por_panel(
+        resultado_despiece,
+        tiempo_por_corte_min=tiempo_por_corte,
+        velocidad_soldadura_mm_por_min=velocidad_sold,
+        tiempos_perforacion_por_tipo=tiempos_perforacion_por_tipo,
+    )
+
+    costos_por_panel, total_general_usd, detalle_costos, detalle_unidades = (
+        calcular_costos_por_panel(resultado_despiece, tiempos_panel, tasa, True)
+    )
+    
+    return costos_por_panel, total_general_usd, detalle_costos, detalle_unidades
 
 ###
 
